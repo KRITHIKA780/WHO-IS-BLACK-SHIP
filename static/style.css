@@ -3,8 +3,10 @@
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --accent-primary: #3b82f6;
-    # Blue --accent-secondary: #8b5cf6;
-    # Violet --success: #10b981;
+    --accent-secondary: #8b5cf6;
+    /* Blue */
+    --success: #10b981;
+    /* Violet */
     --danger: #ef4444;
     --glass-bg: rgba(30, 41, 59, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
@@ -109,6 +111,7 @@ body {
     margin-bottom: 0.5rem;
     background: linear-gradient(to right, #fff, #94a3b8);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
