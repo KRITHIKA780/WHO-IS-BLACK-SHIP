@@ -33,12 +33,8 @@
     <!-- Main Navigation -->
     {% if current_user.is_authenticated %}
     <nav class="cyber-nav">
-        <div class="nav-brand">G.</div>
+        <div class="nav-brand">BLACK SHIP</div>
         <div class="nav-menu">
-            <a href="{{ url_for('about') }}" class="nav-link {% if view == 'about' %}active{% endif %}"
-                data-tooltip="System Intel">
-                <i class="fa-solid fa-microchip"></i>
-            </a>
             <a href="{{ url_for('tracker') }}" class="nav-link {% if view == 'tracker' %}active{% endif %}"
                 data-tooltip="Hunter">
                 <i class="fa-solid fa-satellite-dish"></i>
@@ -61,12 +57,11 @@
             </div>
         </header>
 
-        {% if view == 'auth' %}
-        <!-- AUTHENTICATION MODULE -->
-        <main id="auth-panel" class="cyber-card entrance-anim">
+        <!-- 1. AUTHENTICATION MODULE -->
+        <main id="auth-panel" class="cyber-card panel-view {% if view == 'auth' %}active{% endif %}" data-panel="auth">
             <div class="card-glow"></div>
             <div class="auth-switcher">
-                <button class="switch-btn active" id="btnShowLogin">ACCESS</button>
+                <button class="switch-btn active" id="btnShowLogin">LOGIC</button>
                 <button class="switch-btn" id="btnShowRegister">INITIATE</button>
                 <div class="switch-slider"></div>
             </div>
@@ -85,7 +80,7 @@
                     <div class="input-line"></div>
                 </div>
                 <button class="cyber-btn primary" id="loginBtn">
-                    <span class="btn-text">ESTABLISH UPLINK</span>
+                    <span class="btn-text">PROCEED</span>
                     <span class="btn-glitch"></span>
                 </button>
             </div>
@@ -115,152 +110,142 @@
             </div>
         </main>
 
-        {% elif view == 'about' %}
-        <!-- INTEL MODULE -->
-        <main id="about-panel" class="cyber-card large entrance-anim">
+        <!-- 2. METHODS MODULE -->
+        <main id="methods-panel" class="cyber-card large panel-view {% if view == 'methods' %}active{% endif %}"
+            data-panel="methods">
             <div class="card-glow"></div>
-            <div class="intel-content">
-                <div class="intel-header">
-                    <h2>TACTICAL OVERVIEW</h2>
-                    <div class="header-decoration"></div>
-                </div>
-
-                <p class="intel-brief">
-                    The Black Ship protocol utilizes advanced heuristics to cross-reference data streams.
-                    It bridges the void between expected attendance and actual signal input.
-                </p>
-
-                <div class="specs-grid">
-                    <div class="spec-card">
-                        <div class="spec-icon"><i class="fa-solid fa-bolt"></i></div>
-                        <h3>Hyper-Speed</h3>
-                        <p>Instantaneous processing of massive datasets.</p>
-                    </div>
-                    <div class="spec-card">
-                        <div class="spec-icon"><i class="fa-solid fa-eye"></i></div>
-                        <h3>Deep Vision</h3>
-                        <p>Pattern recognition for fuzzy matching names.</p>
-                    </div>
-                    <div class="spec-card">
-                        <div class="spec-icon"><i class="fa-solid fa-lock"></i></div>
-                        <h3>Void Safe</h3>
-                        <p>Data remains local. No external leaks.</p>
-                    </div>
-                </div>
-
-                <a href="{{ url_for('tracker') }}" class="cyber-btn primary center-btn">
-                    <span class="btn-text">ENGAGE TRACKER</span>
-                </a>
+            <div class="instructions-panel">
+                <div class="hud-label">HOW TO USE BLACK SHIP</div>
+                <p class="view-description">Follow these steps to execute your student data analysis.</p>
+                <ul class="how-to-list">
+                    <li>Paste your <strong>Google Sheet URL</strong> or upload a <strong>Student Manifest</strong>
+                        (.csv/.xlsx).</li>
+                    <li>Ensure your sheet has a column for student names.</li>
+                    <li>Click <strong>START ANALYSIS</strong> to begin the cross-referencing process.</li>
+                    <li>Download the final report as an <strong>Excel file</strong> for your records.</li>
+                </ul>
+                <button class="cyber-btn primary" id="btnToTracker" style="margin-top: 2rem;">
+                    <span class="btn-text">ENGAGE ANALYZER</span>
+                    <span class="btn-glitch"></span>
+                </button>
             </div>
         </main>
 
-        {% elif view == 'tracker' %}
-        <!-- TRACKER MODULE -->
-        <main id="config-panel" class="cyber-card large entrance-anim">
-            <div class="card-glow"></div>
+        <!-- 3. TRACKER MODULE -->
+        <div id="tracker-panel" class="panel-view {% if view == 'tracker' %}active{% endif %}" data-panel="tracker">
+            <main id="config-panel" class="cyber-card large">
+                <div class="card-glow"></div>
 
-            <div id="errorBanner" class="cyber-toast error hidden">
-                <div class="toast-icon"><i class="fa-solid fa-bug"></i></div>
-                <span id="errorText">System Malfunction</span>
-            </div>
-
-            <div class="mode-selector">
-                <button class="mode-btn active" id="btnLinkMode">
-                    <i class="fa-solid fa-link"></i> NETWORK LINK
-                </button>
-                <button class="mode-btn" id="btnFileMode">
-                    <i class="fa-solid fa-database"></i> LOCAL DATA
-                </button>
-            </div>
-
-            <!-- Mode: Link -->
-            <div id="modeLink" class="input-section">
-                <div class="cyber-input-group large">
-                    <input type="text" id="sheetUrl" required placeholder=" ">
-                    <label>Target URL Endpoint</label>
-                    <i class="fa-solid fa-crosshairs input-icon"></i>
-                    <div class="input-line"></div>
+                <div id="errorBanner" class="cyber-toast error hidden">
+                    <div class="toast-icon"><i class="fa-solid fa-bug"></i></div>
+                    <span id="errorText">System Malfunction</span>
                 </div>
-            </div>
 
-            <!-- Mode: File Upload -->
-            <div id="modeFile" class="input-section hidden">
-                <div class="holo-dropzone" id="dropArea">
-                    <div class="drop-content">
-                        <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
-                        <h3>UPLOAD FILE</h3>
-                        <p>Drag & Drop or Click to Select</p>
+                <div class="tracker-panel">
+                    <div class="mode-selector">
+                        <button class="mode-btn active" id="btnLinkMode">
+                            <i class="fa-solid fa-link"></i> NETWORK LINK
+                        </button>
+                        <button class="mode-btn" id="btnFileMode">
+                            <i class="fa-solid fa-database"></i> LOCAL DATA
+                        </button>
                     </div>
-                    <input type="file" id="fileInput" class="hidden" accept=".csv, .xlsx, .xls">
-                </div>
-                <div id="filePreview" class="file-manifest hidden">
-                    <div class="manifest-icon"><i class="fa-solid fa-file-code"></i></div>
-                    <span id="fileName">data.csv</span>
-                    <button class="delete-btn" id="removeFile"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-            </div>
 
-            <button class="cyber-btn action" id="checkBtn">
-                <span class="btn-text">START ANALYSIS</span>
-                <div class="loading-spinner hidden" id="btnSpinner"></div>
-            </button>
-
-            <div id="loading" class="scan-overlay hidden">
-                <div class="scanner-line"></div>
-                <div class="scanner-text">ANALYZING DATA...</div>
-            </div>
-        </main>
-
-        <!-- DASHBOARD RESULTS -->
-        <section id="results" class="results-dashboard hidden">
-            <!-- HUD Stats -->
-            <div class="hud-grid">
-                <div class="hud-panel total">
-                    <div class="hud-label">TOTAL STUDENTS</div>
-                    <div class="hud-value" id="totalCount">0</div>
-                    <div class="hud-bar"></div>
-                </div>
-                <div class="hud-panel verified">
-                    <div class="hud-label">RESPONDED</div>
-                    <div class="hud-value" id="respondedCount">0</div>
-                    <div class="hud-bar"></div>
-                </div>
-                <div class="hud-panel missing">
-                    <div class="hud-label">NOT RESPONDED</div>
-                    <div class="hud-value" id="notRespondedCount">0</div>
-                    <div class="hud-bar"></div>
-                </div>
-            </div>
-
-            <!-- Data Feeds -->
-            <div class="feed-container">
-                <!-- Verified Feed -->
-                <div class="data-feed verified-feed">
-                    <div class="feed-header">
-                        <h3><i class="fa-solid fa-circle-check"></i> RESPONDED LIST</h3>
-                        <span class="feed-badge" id="respondedBadge">0</span>
+                    <!-- Mode: Link -->
+                    <div id="modeLink" class="input-section">
+                        <div class="cyber-input-group large">
+                            <input type="text" id="sheetUrl" required placeholder=" ">
+                            <label>Target URL Endpoint</label>
+                            <i class="fa-solid fa-crosshairs input-icon"></i>
+                            <div class="input-line"></div>
+                        </div>
                     </div>
-                    <ul id="respondedUl" class="feed-list"></ul>
-                    <button class="feed-action" id="copyResponded">
-                        <i class="fa-solid fa-file-excel"></i> DOWNLOAD EXCEL
+
+                    <!-- Mode: File Upload -->
+                    <div id="modeFile" class="input-section hidden">
+                        <div class="holo-dropzone" id="dropArea">
+                            <div class="drop-content">
+                                <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                                <h3>UPLOAD FILE</h3>
+                                <p>Drag & Drop or Click to Select</p>
+                            </div>
+                            <input type="file" id="fileInput" class="hidden" accept=".csv, .xlsx, .xls">
+                        </div>
+                        <div id="filePreview" class="file-manifest hidden">
+                            <div class="manifest-icon"><i class="fa-solid fa-file-code"></i></div>
+                            <span id="fileName">data.csv</span>
+                            <button class="delete-btn" id="removeFile"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <button class="cyber-btn action" id="checkBtn">
+                        <span class="btn-text">START ANALYSIS</span>
+                        <div class="loading-spinner hidden" id="btnSpinner"></div>
                     </button>
+
+                    <div id="loading" class="scan-overlay hidden">
+                        <div class="scanner-line"></div>
+                        <div class="scanner-text">ANALYZING DATA...</div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- DASHBOARD RESULTS -->
+            <section id="results" class="results-dashboard hidden">
+                <!-- HUD Stats -->
+                <div class="hud-grid">
+                    <div class="hud-panel total">
+                        <div class="hud-label">TOTAL STUDENTS</div>
+                        <div class="hud-value" id="totalCount">0</div>
+                        <div class="hud-bar"></div>
+                    </div>
+                    <div class="hud-panel verified">
+                        <div class="hud-label">RESPONDED</div>
+                        <div class="hud-value" id="respondedCount">0</div>
+                        <div class="hud-bar"></div>
+                    </div>
+                    <div class="hud-panel missing">
+                        <div class="hud-label">NOT RESPONDED</div>
+                        <div class="hud-value" id="notRespondedCount">0</div>
+                        <div class="hud-bar"></div>
+                    </div>
                 </div>
 
-                <!-- Missing Feed -->
-                <div class="data-feed missing-feed">
-                    <div class="feed-header">
-                        <h3><i class="fa-solid fa-circle-xmark"></i> MISSING LIST</h3>
-                        <span class="feed-badge" id="notRespondedBadge">0</span>
+                <!-- Data Feeds -->
+                <div class="feed-container">
+                    <!-- Verified Feed -->
+                    <div class="data-feed verified-feed">
+                        <div class="feed-header">
+                            <h3><i class="fa-solid fa-circle-check"></i> RESPONDED LIST</h3>
+                            <span class="feed-badge" id="respondedBadge">0</span>
+                        </div>
+                        <ul id="respondedUl" class="feed-list"></ul>
+                        <button class="feed-action" id="copyResponded">
+                            <i class="fa-solid fa-file-excel"></i> DOWNLOAD EXCEL
+                        </button>
                     </div>
-                    <ul id="notRespondedUl" class="feed-list"></ul>
-                    <button class="feed-action" id="copyNotResponded">
-                        <i class="fa-solid fa-file-excel"></i> DOWNLOAD EXCEL
-                    </button>
+
+                    <!-- Missing Feed -->
+                    <div class="data-feed missing-feed">
+                        <div class="feed-header">
+                            <h3><i class="fa-solid fa-circle-xmark"></i> MISSING LIST</h3>
+                            <span class="feed-badge" id="notRespondedBadge">0</span>
+                        </div>
+                        <ul id="notRespondedUl" class="feed-list"></ul>
+                        <button class="feed-action" id="copyNotResponded">
+                            <i class="fa-solid fa-file-excel"></i> DOWNLOAD EXCEL
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </section>
-        {% endif %}
+            </section>
+        </div>
+
     </div>
+
+    <footer class="cyber-footer">
+        <div class="footer-line"></div>
+        <p>DEVELOPER: <span class="dev-name">KRITHIKA N</span></p>
+    </footer>
 
     <script src="/static/script.js"></script>
 </body>

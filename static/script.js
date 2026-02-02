@@ -39,19 +39,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showAuthError = (msg) => {
         if (authErrorText) {
-            authErrorText.textContent = msg;
+            authErrorText.innerHTML = msg;
             authError.classList.remove('hidden');
-            // Auto-hide after 3 seconds
             setTimeout(() => authError.classList.add('hidden'), 3000);
         }
     };
+
+    async function switchView(targetUrl) {
+        try {
+            // Determine target panel
+            let targetPanelName = 'auth';
+            if (targetUrl.includes('/methods')) targetPanelName = 'methods';
+            if (targetUrl.includes('/tracker')) targetPanelName = 'tracker';
+
+            const panels = document.querySelectorAll('.panel-view');
+            const currentPanel = document.querySelector('.panel-view.active');
+            const targetPanel = document.querySelector(`.panel-view[data-panel="${targetPanelName}"]`);
+
+            if (!targetPanel) {
+                window.location.href = targetUrl;
+                return;
+            }
+
+            if (currentPanel) {
+                currentPanel.classList.remove('active', 'entrance-anim');
+                currentPanel.classList.add('exit-anim');
+            }
+
+            // Small delay for exit if it exists
+            targetPanel.classList.remove('exit-anim');
+            targetPanel.classList.add('active', 'entrance-anim');
+
+            // Update Nav brand color if needed or active links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === targetUrl) link.classList.add('active');
+                else link.classList.remove('active');
+            });
+
+            // Update URL
+            history.pushState({}, '', targetUrl);
+
+            // Re-initialize logic
+            initTracker();
+            bindNavButtons();
+        } catch (err) {
+            console.error("View switch failed:", err);
+            window.location.href = targetUrl; // Fallback
+        }
+    }
 
     if (loginBtn) {
         loginBtn.addEventListener('click', async () => {
             const username = loginUser.value;
             const password = loginPass.value;
 
-            // Add loading state
             loginBtn.classList.add('loading');
 
             if (!username || !password) {
@@ -67,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    window.location.href = '/about';
+                    switchView('/methods');
                 } else {
                     showAuthError(data.error.toUpperCase());
                 }
@@ -95,10 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (res.ok) {
                     btnShowLogin.click();
-                    showAuthError("IDENTITY REGISTERED. PLEASE ACCESS."); // Reusing toast for success momentarily
-                    authError.classList.remove('error');
-                    authError.style.borderColor = 'var(--signal-green)';
-                    authError.style.color = 'var(--signal-green)';
+                    showAuthError("IDENTITY REGISTERED. PLEASE LOG IN.");
                 } else {
                     showAuthError(data.error.toUpperCase());
                 }
@@ -108,16 +146,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Tracker Logic ---
-    const sheetUrlInput = document.getElementById('sheetUrl');
-    const checkBtn = document.getElementById('checkBtn');
-    const loadingSection = document.getElementById('loading');
-    const resultsSection = document.getElementById('results');
-    const errorBanner = document.getElementById('errorBanner');
-    const errorText = document.getElementById('errorText');
-    const btnSpinner = document.getElementById('btnSpinner');
+    function bindNavButtons() {
+        const btnToTracker = document.getElementById('btnToTracker');
+        if (btnToTracker) {
+            btnToTracker.addEventListener('click', () => switchView('/tracker'));
+        }
+    }
 
-    if (checkBtn) {
+    // --- Tracker Logic ---
+    function initTracker() {
+        const checkBtn = document.getElementById('checkBtn');
+        if (!checkBtn) return;
+
+        const sheetUrlInput = document.getElementById('sheetUrl');
+        const loadingSection = document.getElementById('loading');
+        const resultsSection = document.getElementById('results');
+        const errorBanner = document.getElementById('errorBanner');
+        const errorText = document.getElementById('errorText');
+        const btnSpinner = document.getElementById('btnSpinner');
+
         // Stats
         const totalCountEl = document.getElementById('totalCount');
         const respondedCountEl = document.getElementById('respondedCount');
@@ -321,4 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+
+    // Initialize on first load
+    initTracker();
+    bindNavButtons();
 });

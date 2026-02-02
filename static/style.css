@@ -365,18 +365,35 @@ label {
 }
 
 .entrance-anim {
-    animation: slideUpFade 0.8s var(--ease-out-quart);
+    animation: slideUpFade 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.exit-anim {
+    animation: slideDownFade 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    pointer-events: none;
 }
 
 @keyframes slideUpFade {
     from {
         opacity: 0;
-        transform: translateY(40px);
+        transform: translateY(30px) scale(0.98);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
     }
 }
 
@@ -845,4 +862,92 @@ label {
     .cyber-nav {
         padding: 1rem;
     }
+}
+
+/* --- Footer --- */
+.cyber-footer {
+    padding: 3rem 1rem;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 3px;
+    width: 100%;
+    margin-top: 2rem;
+    position: relative;
+    z-index: 5;
+}
+
+.footer-line {
+    width: 60px;
+    height: 2px;
+    background: var(--nebula-teal);
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 0 15px var(--nebula-teal);
+    border-radius: 2px;
+}
+
+.dev-name {
+    color: var(--nebula-teal);
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+}
+
+/* Panel Visibility */
+.panel-view {
+    display: none;
+    opacity: 0;
+}
+
+.panel-view.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Instructions Panel */
+.instructions-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-top: 2px solid var(--nebula-teal);
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin: 2rem auto;
+    max-width: 800px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.view-description {
+    color: var(--nebula-pink);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.how-to-list {
+    margin-top: 1rem;
+    list-style: none;
+    padding: 0;
+}
+
+.how-to-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.how-to-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--nebula-teal);
+    font-weight: bold;
+}
+
+.how-to-list strong {
+    color: var(--nebula-teal);
 }

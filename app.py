@@ -150,7 +150,7 @@ def analyze_dataframe(df):
 @app.route('/')
 def index():
     if current_user.is_authenticated:
-        return redirect(url_for('about'))
+        return redirect(url_for('methods'))
     return render_template('index.html', view='auth')
 
 @app.route('/register', methods=['POST'])
@@ -186,10 +186,10 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@app.route('/about')
+@app.route('/methods')
 @login_required
-def about():
-    return render_template('index.html', view='about')
+def methods():
+    return render_template('index.html', view='methods')
 
 @app.route('/tracker')
 @login_required
