@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1.2">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -28,7 +28,7 @@
             display: block;
         }
 
-        /* Default visible */
+        /* Initial state failsafe */
     </style>
 </head>
 
@@ -49,6 +49,7 @@
         <section id="view-login" class="view-section">
             <div class="glass-panel main-input" style="max-width: 500px; margin: 0 auto;">
                 <h2 style="text-align: center; margin-bottom: 2rem;">Welcome to G-Tracker</h2>
+                <div id="loginError" class="hidden"></div>
                 <div class="input-group">
                     <input type="text" id="usernameInput" placeholder="Enter your name to start...">
                     <i class="fa-solid fa-user input-icon"></i>
@@ -88,6 +89,8 @@
                         File</button>
                 </div>
 
+                <div id="appError" class="hidden"></div>
+
                 <!-- URL Mode -->
                 <div id="modeLink" class="input-group">
                     <input type="text" id="sheetUrl" placeholder="Paste your Google Sheet link here...">
@@ -123,22 +126,25 @@
 
             <!-- Results -->
             <section id="results" class="hidden">
+                <!-- explicit target for debug/analysis info -->
+                <div id="debugTarget" class="hidden" style="margin-bottom: 2rem;"></div>
+
                 <div class="results-grid">
-                    <div class="stat-card" style="--delay: 0.1s">
+                    <div class="stat-card">
                         <div class="icon-box total"><i class="fa-solid fa-users"></i></div>
                         <div class="stat-info">
                             <h3>Total Students</h3>
                             <p id="totalCount">0</p>
                         </div>
                     </div>
-                    <div class="stat-card" style="--delay: 0.2s">
+                    <div class="stat-card">
                         <div class="icon-box responded"><i class="fa-solid fa-check"></i></div>
                         <div class="stat-info">
                             <h3>Responded</h3>
                             <p id="respondedCount">0</p>
                         </div>
                     </div>
-                    <div class="stat-card" style="--delay: 0.3s">
+                    <div class="stat-card">
                         <div class="icon-box not-responded"><i class="fa-solid fa-xmark"></i></div>
                         <div class="stat-info">
                             <h3>Not Responded</h3>
@@ -149,7 +155,7 @@
 
                 <div class="results-grid" style="margin-top: 2rem;">
                     <!-- Responded -->
-                    <div class="list-container responded-list" style="--delay: 0.4s">
+                    <div class="list-container responded-list">
                         <div class="list-header">
                             <h2><i class="fa-solid fa-circle-check"></i> Responded</h2>
                             <div class="header-actions">
@@ -162,7 +168,7 @@
                     </div>
 
                     <!-- Not Responded -->
-                    <div class="list-container not-responded-list" style="--delay: 0.5s">
+                    <div class="list-container not-responded-list">
                         <div class="list-header">
                             <h2><i class="fa-solid fa-circle-xmark"></i> Not Responded</h2>
                             <div class="header-actions">
@@ -179,7 +185,7 @@
 
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}?v=1.1"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=1.2"></script>
 </body>
 
 </html>
