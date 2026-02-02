@@ -4,601 +4,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-Tracker | Premium Analytics</title>
+    <title>G-Tracker | Premium Analytics Engine</title>
+
+    <!-- Meta Tags -->
+    <meta name="description"
+        content="Advanced Google Sheet response tracker with premium analytics and real-time verification.">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        :root {
-            --bg-dark: #000000;
-            --glass-surface: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-highlight: rgba(255, 255, 255, 0.15);
-            --neon-blue: #00f3ff;
-            --neon-purple: #bc13fe;
-            --neon-green: #0aff0a;
-            --text-main: #ffffff;
-            --text-dim: #94a3b8;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-            display: flex;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        /* Animated Background */
-        .bg-mesh {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background:
-                radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.15), transparent 40%),
-                radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15), transparent 40%);
-            animation: pulseBg 10s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulseBg {
-            0% {
-                transform: scale(1);
-                opacity: 0.8;
-            }
-
-            100% {
-                transform: scale(1.1);
-                opacity: 1;
-            }
-        }
-
-        .container {
-            width: 100%;
-            max-width: 900px;
-            padding: 2rem 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            z-index: 1;
-        }
-
-        /* Typography */
-        .hero {
-            text-align: center;
-            margin: 3rem 0;
-            animation: fadeDown 1s ease-out;
-        }
-
-        .logo {
-            font-size: 4rem;
-            font-weight: 800;
-            letter-spacing: -2px;
-            background: linear-gradient(135deg, #fff 30%, var(--text-dim));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-        }
-
-        .dot {
-            color: var(--neon-blue);
-            -webkit-text-fill-color: var(--neon-blue);
-            text-shadow: 0 0 20px var(--neon-blue);
-        }
-
-        .subtitle {
-            color: var(--text-dim);
-            font-size: 1.2rem;
-            font-weight: 300;
-            letter-spacing: 1px;
-            margin-top: 0.5rem;
-        }
-
-        /* Glass Cards */
-        .glass-panel {
-            background: var(--glass-surface);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 2.5rem;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .glass-panel:hover {
-            border-color: var(--glass-highlight);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.02);
-        }
-
-        /* Input Zone */
-        .input-wrapper {
-            position: relative;
-            margin-bottom: 2rem;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 1.5rem 1.5rem 1.5rem 3.5rem;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            color: #fff;
-            font-size: 1.1rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 4px rgba(0, 243, 255, 0.1);
-            background: rgba(0, 0, 0, 0.6);
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 1.2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-dim);
-            transition: 0.3s;
-        }
-
-        input[type="text"]:focus+.input-icon {
-            color: var(--neon-blue);
-        }
-
-        /* Button */
-        .primary-btn {
-            width: 100%;
-            padding: 1.2rem;
-            border: none;
-            border-radius: 16px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 20px rgba(0, 243, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .primary-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(188, 19, 254, 0.3);
-        }
-
-        .primary-btn:active {
-            transform: translateY(0);
-            opacity: 0.9;
-        }
-
-        /* Results Area */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transition: 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
-            transform: translateX(-100%);
-            transition: 0.5s;
-        }
-
-        .stat-card:hover::before {
-            transform: translateX(100%);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--glass-highlight);
-        }
-
-        .icon-box {
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .total .icon-box {
-            color: var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
-        }
-
-        .responded .icon-box {
-            color: var(--neon-green);
-            box-shadow: 0 0 15px rgba(10, 255, 10, 0.1);
-        }
-
-        .missing .icon-box {
-            color: var(--neon-purple);
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.1);
-        }
-
-        .stat-info h3 {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.2rem;
-        }
-
-        .stat-info p {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        /* Lists */
-        .list-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .list-card {
-            background: var(--glass-surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            max-height: 500px;
-        }
-
-        .list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.2rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .list-header h2 {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .badge {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-        }
-
-        .student-list {
-            list-style: none;
-            overflow-y: auto;
-            flex: 1;
-            padding-right: 0.5rem;
-        }
-
-        .student-list::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .student-list::-webkit-scrollbar-thumb {
-            background: var(--glass-border);
-            border-radius: 10px;
-        }
-
-        .student-list li {
-            padding: 0.8rem;
-            border-radius: 10px;
-            margin-bottom: 0.5rem;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid transparent;
-            transition: 0.2s;
-            font-weight: 500;
-        }
-
-        .student-list li:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--glass-border);
-            transform: translateX(3px);
-        }
-
-        /* Status colors for lists */
-        .list-responded h2 {
-            color: var(--neon-green);
-        }
-
-        .list-missing h2 {
-            color: var(--neon-purple);
-        }
-
-        /* Utilities */
-        .hidden {
-            display: none !important;
-        }
-
-        .error-banner {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--neon-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 2rem auto;
-        }
-
-        @keyframes spin {
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes fadeDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Mobile */
-        @media (max-width: 768px) {
-            .logo {
-                font-size: 2.5rem;
-            }
-
-            .results-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .list-section {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
-    <div class="bg-mesh"></div>
+    <!-- Premium Background Engine -->
+    <div class="bg-canvas">
+        <div class="bg-orb orb-1"></div>
+        <div class="bg-orb orb-2"></div>
+        <div class="bg-orb orb-3"></div>
+    </div>
 
     <div class="container">
+        <!-- Hero Header -->
         <header class="hero">
             <h1 class="logo">G-Tracker<span class="dot">.</span></h1>
-            <p class="subtitle">Premium Form Response Analytics</p>
+            <p class="subtitle">Next-Gen Form Analysis</p>
         </header>
 
-        <!-- Main Interface -->
-        <div id="main-panel" class="glass-panel" style="animation: fadeUp 0.8s ease-out 0.2s backwards;">
+        <!-- Configuration Panel -->
+        <main id="config-panel" class="glass-card view-transition">
             <div id="errorBanner" class="error-banner hidden">
-                <i class="fa-solid fa-triangle-exclamation"></i> <span id="errorText">Error message</span>
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span id="errorText">System message...</span>
             </div>
 
-            <div class="input-wrapper">
-                <input type="text" id="sheetUrl" placeholder="Paste your Google Sheet link here...">
-                <i class="fa-solid fa-link input-icon"></i>
+            <!-- Input Method Toggle -->
+            <div class="tab-container">
+                <button class="tab-btn active" id="btnLinkMode"><i class="fa-solid fa-link"></i> Sheet URL</button>
+                <button class="tab-btn" id="btnFileMode"><i class="fa-solid fa-file-csv"></i> Local File</button>
             </div>
 
-            <button class="primary-btn" id="checkBtn">
-                <span>Check Responses</span> <i class="fa-solid fa-arrow-right-long"></i>
+            <!-- Mode: Link -->
+            <div id="modeLink" class="input-field-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="sheetUrl" placeholder="Enter Google Sheet URL..." autocomplete="off">
+            </div>
+
+            <!-- Mode: File Upload -->
+            <div id="modeFile" class="hidden">
+                <div class="file-drop-area" id="dropArea">
+                    <i class="fa-solid fa-cloud-arrow-up file-icon"></i>
+                    <p class="file-text">Click or drag <span>CSV/Excel</span> file</p>
+                    <p class="file-sub">Maximum file size: 10MB</p>
+                    <input type="file" id="fileInput" class="hidden" accept=".csv, .xlsx, .xls">
+                </div>
+                <div id="filePreview" class="file-preview hidden">
+                    <i class="fa-solid fa-file-circle-check"></i>
+                    <span id="fileName">document.csv</span>
+                    <i class="fa-solid fa-trash-can remove-file" id="removeFile"></i>
+                </div>
+            </div>
+
+            <button class="btn-premium" id="checkBtn">
+                <span>Start Verification</span>
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
             </button>
 
-            <div id="loading" class="hidden">
-                <div class="spinner"></div>
+            <div id="loading" class="loader-wrapper hidden">
+                <div class="shimmer-loader"></div>
             </div>
-        </div>
+        </main>
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="hidden" style="animation: fadeUp 0.8s ease-out;">
-            <div class="results-grid">
-                <div class="stat-card total">
-                    <div class="icon-box"><i class="fa-solid fa-users"></i></div>
-                    <div class="stat-info">
-                        <h3>Total</h3>
-                        <p id="totalCount">0</p>
-                    </div>
+        <!-- Dashboard Section -->
+        <section id="results" class="hidden view-transition" style="margin-top: 3rem;">
+            <!-- Analytics Overview -->
+            <div class="stats-grid">
+                <div class="stat-item stat-total">
+                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-label">Total Volume</div>
+                    <div class="stat-value" id="totalCount">0</div>
                 </div>
-                <div class="stat-card responded">
-                    <div class="icon-box"><i class="fa-solid fa-check"></i></div>
-                    <div class="stat-info">
-                        <h3>Found</h3>
-                        <p id="respondedCount">0</p>
-                    </div>
+                <div class="stat-item stat-found">
+                    <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="stat-label">Verified Resp.</div>
+                    <div class="stat-value" id="respondedCount">0</div>
                 </div>
-                <div class="stat-card missing">
-                    <div class="icon-box"><i class="fa-solid fa-ghost"></i></div>
-                    <div class="stat-info">
-                        <h3>Missing</h3>
-                        <p id="notRespondedCount">0</p>
-                    </div>
+                <div class="stat-item stat-missing">
+                    <div class="stat-icon"><i class="fa-solid fa-ghost"></i></div>
+                    <div class="stat-label">Outstanding</div>
+                    <div class="stat-value" id="notRespondedCount">0</div>
                 </div>
             </div>
 
-            <div class="list-section">
-                <!-- Responded List -->
-                <div class="list-card list-responded">
-                    <div class="list-header">
-                        <h2><i class="fa-regular fa-circle-check"></i> Completed</h2>
+            <!-- Data Breakdown -->
+            <div class="data-lists">
+                <!-- Verified List -->
+                <div class="glass-card content-panel">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-check-double" style="color: hsl(var(--neon-green));"></i> Verified
+                        </h2>
                         <span class="badge" id="respondedBadge">0</span>
                     </div>
-                    <ul id="respondedUl" class="student-list"></ul>
+                    <ul id="respondedUl" class="item-list"></ul>
+                    <button class="copy-btn" id="copyResponded"
+                        style="margin-top: 1rem; width: 100%; border: none; background: hsla(210, 40%, 98%, 0.05); padding: 0.5rem; border-radius: 8px; color: var(--text-secondary); cursor: pointer;">
+                        <i class="fa-solid fa-copy"></i> Export List
+                    </button>
                 </div>
 
                 <!-- Missing List -->
-                <div class="list-card list-missing">
-                    <div class="list-header">
-                        <h2><i class="fa-regular fa-circle-xmark"></i> Missing</h2>
+                <div class="glass-card content-panel">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-circle-xmark" style="color: hsl(var(--neon-purple));"></i> Missing
+                        </h2>
                         <span class="badge" id="notRespondedBadge">0</span>
                     </div>
-                    <ul id="notRespondedUl" class="student-list"></ul>
+                    <ul id="notRespondedUl" class="item-list"></ul>
+                    <button class="copy-btn" id="copyNotResponded"
+                        style="margin-top: 1rem; width: 100%; border: none; background: hsla(210, 40%, 98%, 0.05); padding: 0.5rem; border-radius: 8px; color: var(--text-secondary); cursor: pointer;">
+                        <i class="fa-solid fa-copy"></i> Export List
+                    </button>
                 </div>
             </div>
-        </div>
+
+            <!-- Intelligence Logs -->
+            <div id="debugTarget" class="glass-card hidden"
+                style="margin-top: 2rem; padding: 1.5rem; font-size: 0.9rem;">
+                <!-- Analysis details will be injected here -->
+            </div>
+        </section>
     </div>
 
-    <script>
-        // Force cleanup
-        localStorage.clear();
-
-        document.getElementById('checkBtn').addEventListener('click', async () => {
-            const urlInput = document.getElementById('sheetUrl');
-            const errorBanner = document.getElementById('errorBanner');
-            const dashboard = document.getElementById('dashboard');
-            const loading = document.getElementById('loading');
-            const btn = document.getElementById('checkBtn');
-
-            // Reset
-            errorBanner.classList.add('hidden');
-            dashboard.classList.add('hidden');
-
-            const url = urlInput.value.trim();
-            if (!url) {
-                showError("Please enter a valid Google Sheet URL.");
-                return;
-            }
-
-            // Start Loading
-            loading.classList.remove('hidden');
-            btn.style.opacity = '0.5';
-            btn.disabled = true;
-
-            try {
-                const response = await fetch('/check', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || "Analysis failed.");
-
-                // Render Stats
-                animateValue("totalCount", 0, data.total_students, 1000);
-                animateValue("respondedCount", 0, data.responded_count, 1000);
-                animateValue("notRespondedCount", 0, data.not_responded_count, 1000);
-
-                document.getElementById('respondedBadge').textContent = data.responded_count;
-                document.getElementById('notRespondedBadge').textContent = data.not_responded_count;
-
-                // Render Lists
-                renderList(document.getElementById('respondedUl'), data.responded_list);
-                renderList(document.getElementById('notRespondedUl'), data.not_responded_list);
-
-                // Show Dashboard
-                dashboard.classList.remove('hidden');
-                // Smooth scroll
-                setTimeout(() => dashboard.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-
-            } catch (err) {
-                showError(err.message);
-            } finally {
-                loading.classList.add('hidden');
-                btn.style.opacity = '1';
-                btn.disabled = false;
-            }
-        });
-
-        function showError(msg) {
-            const banner = document.getElementById('errorBanner');
-            document.getElementById('errorText').textContent = msg;
-            banner.classList.remove('hidden');
-            banner.parentElement.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function renderList(ul, items) {
-            ul.innerHTML = '';
-            if (!items.length) {
-                ul.innerHTML = '<li style="opacity:0.5; font-style:italic;">No data found</li>';
-                return;
-            }
-            items.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.style.animation = `fadeUp 0.3s ease-out ${index * 0.05}s backwards`;
-                li.textContent = typeof item === 'object' ? item.name : item;
-                ul.appendChild(li);
-            });
-        }
-
-        function animateValue(id, start, end, duration) {
-            const obj = document.getElementById(id);
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = Math.floor(progress * (end - start) + start);
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-    </script>
+    <!-- Core Engine -->
+    <script src="/static/script.js"></script>
 </body>
 
 </html>
