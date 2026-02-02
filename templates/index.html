@@ -8,184 +8,415 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1.2">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(51, 65, 85, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            z-index: 1;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dot {
+            -webkit-text-fill-color: var(--accent-primary);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
         .hidden {
             display: none !important;
         }
 
-        .view-section {
-            display: none;
+        /* Inputs */
+        .input-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
         }
 
-        .view-section.active {
-            display: block;
+        input[type="text"] {
+            width: 100%;
+            padding: 1.2rem 1.2rem 1.2rem 3.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            outline: none;
         }
 
-        #view-login {
-            display: block;
+        .input-icon {
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
         }
 
-        /* Initial state failsafe */
+        .primary-btn {
+            width: 100%;
+            padding: 1.2rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 0.3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .toggle-btn.active {
+            background: var(--glass-border);
+            color: #fff;
+        }
+
+        /* Stats & Results */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .icon-box {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .icon-box.total {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .icon-box.responded {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .icon-box.not-responded {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .stat-info h3 {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-info p {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        /* Lists */
+        .list-container {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .student-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .student-list li {
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .badge {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 0.3rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .error-msg {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div class="background-globes">
-        <div class="globe globe-1"></div>
-        <div class="globe globe-2"></div>
-        <div class="globe globe-3"></div>
-    </div>
-
     <div class="container">
         <header class="hero">
             <h1 class="logo">G-Tracker <span class="dot">.</span></h1>
-            <p class="subtitle">Separate the active from the inactive. Instantly.</p>
+            <p class="subtitle">Enter your link and check who has responded.</p>
         </header>
 
-        <!-- View 1: Login -->
-        <section id="view-login" class="view-section">
-            <div class="glass-panel main-input" style="max-width: 500px; margin: 0 auto;">
-                <h2 style="text-align: center; margin-bottom: 2rem;">Welcome to G-Tracker</h2>
-                <div id="loginError" class="hidden"></div>
-                <div class="input-group">
-                    <input type="text" id="usernameInput" placeholder="Enter your name to start...">
-                    <i class="fa-solid fa-user input-icon"></i>
-                </div>
-                <button class="primary-btn" id="btnLogin" style="margin-top: 1rem; width: 100%;">
-                    <span>Continue</span> <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
-        </section>
+        <!-- The ONLY view -->
+        <div id="main-interface" class="glass-panel">
+            <div id="errorMessage" class="error-msg hidden"></div>
 
-        <!-- View 2: About / Instructions -->
-        <section id="view-about" class="view-section hidden">
-            <div class="glass-panel main-input" style="max-width: 600px; margin: 0 auto;">
-                <h2 style="margin-bottom: 1.5rem;">Hello, <span id="displayUsername"
-                        style="color: var(--accent-primary);">User</span>!</h2>
-                <p style="margin-bottom: 1rem; line-height: 1.6;">G-Tracker helps you identify who has filled your
-                    Google Form and who hasn't. You can either provide a <strong>Public Google Sheet Link</strong> or
-                    upload a <strong>CSV/Excel file</strong>.</p>
-                <div style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem;">
-                    <p style="font-size: 0.9rem; color: var(--text-secondary);"><i class="fa-solid fa-circle-info"></i>
-                        Make sure your Sheet is set to <strong>"Anyone with the link can view"</strong> if using a URL.
-                    </p>
-                </div>
-                <button class="primary-btn" id="btnFromAbout" style="width: 100%;">
-                    <span>Let's Start</span> <i class="fa-solid fa-rocket"></i>
-                </button>
-            </div>
-        </section>
-
-        <!-- View 3: The App -->
-        <section id="view-app" class="view-section hidden">
-            <div class="glass-panel main-input">
-                <div class="mode-toggle">
-                    <button class="toggle-btn active" id="btnLinkMode"><i class="fa-solid fa-link"></i> Google Sheet
-                        URL</button>
-                    <button class="toggle-btn" id="btnFileMode"><i class="fa-solid fa-file-csv"></i> Upload
-                        File</button>
-                </div>
-
-                <div id="appError" class="hidden"></div>
-
-                <!-- URL Mode -->
-                <div id="modeLink" class="input-group">
-                    <input type="text" id="sheetUrl" placeholder="Paste your Google Sheet link here...">
-                    <i class="fa-solid fa-link input-icon"></i>
-                </div>
-
-                <!-- File Mode -->
-                <div id="modeFile" class="hidden">
-                    <div class="file-drop-area" id="dropArea">
-                        <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.xls">
-                        <div class="file-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                        <p class="file-text"><span>Click to upload</span> or drag and drop</p>
-                        <p class="file-sub">CSV, XLSX, XLS (Max 10MB)</p>
-                    </div>
-                    <div id="filePreview" class="file-preview hidden">
-                        <i class="fa-solid fa-file-csv fa-2x"></i>
-                        <span id="fileName">Filename.csv</span>
-                        <i class="fa-solid fa-circle-xmark remove-file" id="removeFile"></i>
-                    </div>
-                </div>
-
-                <button class="primary-btn" id="checkBtn">
-                    <span>Check Responses</span> <i class="fa-solid fa-arrow-right"></i>
-                </button>
-                <p class="hint">Ensure your sheet includes a 'Name' column.</p>
+            <div class="input-group">
+                <input type="text" id="sheetUrl" placeholder="Paste Google Sheet URL here...">
+                <i class="fa-solid fa-link input-icon"></i>
             </div>
 
-            <!-- Loading -->
-            <div id="loading" class="hidden">
+            <button class="primary-btn" id="checkBtn">
+                <span>Check Responses</span> <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+            <div id="loading" class="hidden" style="margin-top: 1.5rem;">
                 <div class="spinner"></div>
-                <p>Analyzing responses...</p>
+                <p style="text-align: center; margin-top: 0.5rem;">Analyzing...</p>
+            </div>
+        </div>
+
+        <div id="results" class="hidden">
+            <div class="results-grid">
+                <div class="stat-card">
+                    <div class="icon-box total"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-info">
+                        <h3>Total</h3>
+                        <p id="totalCount">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box responded"><i class="fa-solid fa-check"></i></div>
+                    <div class="stat-info">
+                        <h3>Responded</h3>
+                        <p id="respondedCount">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box not-responded"><i class="fa-solid fa-xmark"></i></div>
+                    <div class="stat-info">
+                        <h3>Missing</h3>
+                        <p id="notRespondedCount">0</p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Results -->
-            <section id="results" class="hidden">
-                <!-- explicit target for debug/analysis info -->
-                <div id="debugTarget" class="hidden" style="margin-bottom: 2rem;"></div>
-
-                <div class="results-grid">
-                    <div class="stat-card">
-                        <div class="icon-box total"><i class="fa-solid fa-users"></i></div>
-                        <div class="stat-info">
-                            <h3>Total Students</h3>
-                            <p id="totalCount">0</p>
-                        </div>
+            <div class="results-grid" style="margin-top: 2rem;">
+                <div class="list-container">
+                    <div class="list-header">
+                        <h2>Responded</h2>
+                        <div><span class="badge" id="respondedBadge">0</span></div>
                     </div>
-                    <div class="stat-card">
-                        <div class="icon-box responded"><i class="fa-solid fa-check"></i></div>
-                        <div class="stat-info">
-                            <h3>Responded</h3>
-                            <p id="respondedCount">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="icon-box not-responded"><i class="fa-solid fa-xmark"></i></div>
-                        <div class="stat-info">
-                            <h3>Not Responded</h3>
-                            <p id="notRespondedCount">0</p>
-                        </div>
-                    </div>
+                    <ul id="respondedUl" class="student-list"></ul>
                 </div>
-
-                <div class="results-grid" style="margin-top: 2rem;">
-                    <!-- Responded -->
-                    <div class="list-container responded-list">
-                        <div class="list-header">
-                            <h2><i class="fa-solid fa-circle-check"></i> Responded</h2>
-                            <div class="header-actions">
-                                <span class="badge" id="respondedBadge">0</span>
-                                <button class="copy-btn" id="copyResponded" title="Copy List"><i
-                                        class="fa-regular fa-copy"></i></button>
-                            </div>
-                        </div>
-                        <ul id="respondedUl" class="student-list"></ul>
+                <div class="list-container">
+                    <div class="list-header">
+                        <h2>Missing</h2>
+                        <div><span class="badge" id="notRespondedBadge">0</span></div>
                     </div>
-
-                    <!-- Not Responded -->
-                    <div class="list-container not-responded-list">
-                        <div class="list-header">
-                            <h2><i class="fa-solid fa-circle-xmark"></i> Not Responded</h2>
-                            <div class="header-actions">
-                                <span class="badge" id="notRespondedBadge">0</span>
-                                <button class="copy-btn" id="copyNotResponded" title="Copy List"><i
-                                        class="fa-regular fa-copy"></i></button>
-                            </div>
-                        </div>
-                        <ul id="notRespondedUl" class="student-list"></ul>
-                    </div>
+                    <ul id="notRespondedUl" class="student-list"></ul>
                 </div>
-            </section>
-        </section>
-
+            </div>
+        </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}?v=1.2"></script>
+    <script>
+        // Force reset
+        localStorage.clear();
+
+        document.getElementById('checkBtn').addEventListener('click', async () => {
+            const url = document.getElementById('sheetUrl').value.trim();
+            const errEl = document.getElementById('errorMessage');
+            const loadEl = document.getElementById('loading');
+            const resEl = document.getElementById('results');
+            const btn = document.getElementById('checkBtn');
+
+            if (!url) {
+                errEl.textContent = "Please enter a URL";
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            errEl.classList.add('hidden');
+            loadEl.classList.remove('hidden');
+            resEl.classList.add('hidden');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Failed to process");
+
+                // Populate
+                document.getElementById('totalCount').textContent = data.total_students;
+                document.getElementById('respondedCount').textContent = data.responded_count;
+                document.getElementById('notRespondedCount').textContent = data.not_responded_count;
+                document.getElementById('respondedBadge').textContent = data.responded_count;
+                document.getElementById('notRespondedBadge').textContent = data.not_responded_count;
+
+                renderList(document.getElementById('respondedUl'), data.responded_list);
+                renderList(document.getElementById('notRespondedUl'), data.not_responded_list);
+
+                resEl.classList.remove('hidden');
+                resEl.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (err) {
+                errEl.textContent = err.message;
+                errEl.classList.remove('hidden');
+            } finally {
+                loadEl.classList.add('hidden');
+                btn.disabled = false;
+            }
+        });
+
+        function renderList(ul, items) {
+            ul.innerHTML = '';
+            if (!items.length) {
+                ul.innerHTML = '<li>None found</li>';
+                return;
+            }
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = typeof item === 'object' ? item.name : item;
+                ul.appendChild(li);
+            });
+        }
+    </script>
 </body>
 
 </html>
