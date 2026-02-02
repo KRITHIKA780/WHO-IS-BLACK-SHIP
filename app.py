@@ -129,6 +129,7 @@ def index():
 
 @app.route('/check', methods=['POST'])
 def check_responses():
+    print("DEBUG: Received /check request")
     df = None
     
     # Handle File Upload
