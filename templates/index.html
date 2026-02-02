@@ -26,112 +26,129 @@
             <p class="subtitle">Separate the active from the inactive. Instantly.</p>
         </header>
 
-        <!-- View 1: Login / Welcome -->
+        <!-- View 1: Login -->
         <section id="view-login" class="view-section active">
-            <div class="glass-panel login-panel">
-                <h2>Welcome to G-Tracker</h2>
-                <p>Advanced Google Form Response Analysis</p>
+            <div class="glass-panel main-input" style="max-width: 500px; margin: 0 auto;">
+                <h2 style="text-align: center; margin-bottom: 2rem;">Welcome to G-Tracker</h2>
                 <div class="input-group">
-                    <h3>Total Students</h3>
-                    <p id="totalCount">0</p>
+                    <input type="text" id="usernameInput" placeholder="Enter your name to start...">
+                    <i class="fa-solid fa-user input-icon"></i>
                 </div>
+                <button class="primary-btn" id="btnLogin" style="margin-top: 1rem; width: 100%;">
+                    <span>Continue</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
+        </section>
 
-            <div class="stat-card" style="--delay: 0.2s">
-                <div class="icon-box responded"><i class="fa-solid fa-check"></i></div>
-                <div class="stat-info">
-                    <h3>Responded</h3>
-                    <p id="respondedCount">0</p>
+        <!-- View 2: About / Instructions -->
+        <section id="view-about" class="view-section hidden">
+            <div class="glass-panel main-input" style="max-width: 600px; margin: 0 auto;">
+                <h2 style="margin-bottom: 1.5rem;">Hello, <span id="displayUsername" style="color: var(--accent-primary);">User</span>!</h2>
+                <p style="margin-bottom: 1rem; line-height: 1.6;">G-Tracker helps you identify who has filled your Google Form and who hasn't. You can either provide a <strong>Public Google Sheet Link</strong> or upload a <strong>CSV/Excel file</strong>.</p>
+                <div style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem;">
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);"><i class="fa-solid fa-circle-info"></i> Make sure your Sheet is set to <strong>"Anyone with the link can view"</strong> if using a URL.</p>
                 </div>
+                <button class="primary-btn" id="btnFromAbout" style="width: 100%;">
+                    <span>Let's Start</span> <i class="fa-solid fa-rocket"></i>
+                </button>
             </div>
+        </section>
 
-            <div class="stat-card" style="--delay: 0.3s">
-                <div class="icon-box not-responded"><i class="fa-solid fa-xmark"></i></div>
-                <div class="stat-info">
-                    <h3>Not Responded</h3>
-                    <p id="notRespondedCount">0</p>
+        <!-- View 3: The App -->
+        <section id="view-app" class="view-section hidden">
+            <div class="glass-panel main-input">
+                <div class="mode-toggle">
+                    <button class="toggle-btn active" id="btnLinkMode"><i class="fa-solid fa-link"></i> Google Sheet URL</button>
+                    <button class="toggle-btn" id="btnFileMode"><i class="fa-solid fa-file-csv"></i> Upload File</button>
                 </div>
-            </div>
 
-            <!-- Lists -->
-            <div class="list-container responded-list" style="--delay: 0.4s">
-                <div class="list-header">
-                    <h2><i class="fa-solid fa-circle-check"></i> Responded</h2>
-                    <div class="header-actions">
-                        <span class="badge" id="respondedBadge">0</span>
-                        <button class="copy-btn" id="copyResponded" title="Copy List"><i
-                                class="fa-regular fa-copy"></i></button>
+                <!-- URL Mode -->
+                <div id="modeLink" class="input-group">
+                    <input type="text" id="sheetUrl" placeholder="Paste your Google Sheet link here...">
+                    <i class="fa-solid fa-link input-icon"></i>
+                </div>
+
+                <!-- File Mode -->
+                <div id="modeFile" class="hidden">
+                    <div class="file-drop-area" id="dropArea">
+                        <input type="file" id="fileInput" class="hidden" accept=".csv,.xlsx,.xls">
+                        <div class="file-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <p class="file-text"><span>Click to upload</span> or drag and drop</p>
+                        <p class="file-sub">CSV, XLSX, XLS (Max 10MB)</p>
+                    </div>
+                    <div id="filePreview" class="file-preview hidden">
+                        <i class="fa-solid fa-file-csv fa-2x"></i>
+                        <span id="fileName">Filename.csv</span>
+                        <i class="fa-solid fa-circle-xmark remove-file" id="removeFile"></i>
                     </div>
                 </div>
-                <ul id="respondedUl" class="student-list">
-                    <!-- Items go here -->
-                </ul>
+
+                <button class="primary-btn" id="checkBtn">
+                    <span>Check Responses</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <p class="hint">Ensure your sheet includes a 'Name' column.</p>
             </div>
 
-            <section id="results" class="results-section hidden">
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <h3>Total Students</h3>
-                        <p id="totalCount">0</p>
-                    </div>
-                    <div class="stat-card responded">
-                        <h3>Responded</h3>
-                        <p id="respondedCount">0</p>
-                    </div>
-                    <div class="stat-card not-responded">
-                        <h3>Not Responded</h3>
-                        <p id="notRespondedCount">0</p>
-                    </div>
-                </div>
+            <!-- Loading -->
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p>Analyzing responses...</p>
+            </div>
 
+            <!-- Results -->
+            <section id="results" class="hidden">
                 <div class="results-grid">
-                    <!-- Responded List -->
-                    <div class="list-card">
-                        <div class="list-header responded-header">
-                            <div>
-                                <h3>Responded <span class="badge" id="respondedBadge">0</span></h3>
-                                <small>All fields filled</small>
-                            </div>
-                            <button class="copy-btn" id="copyResponded" title="Copy List"><i
-                                    class="fa-regular fa-copy"></i></button>
+                    <div class="stat-card" style="--delay: 0.1s">
+                        <div class="icon-box total"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Students</h3>
+                            <p id="totalCount">0</p>
                         </div>
-                        <ul id="respondedUl" class="student-list">
-                            <!-- Items -->
-                        </ul>
+                    </div>
+                    <div class="stat-card" style="--delay: 0.2s">
+                        <div class="icon-box responded"><i class="fa-solid fa-check"></i></div>
+                        <div class="stat-info">
+                            <h3>Responded</h3>
+                            <p id="respondedCount">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="--delay: 0.3s">
+                        <div class="icon-box not-responded"><i class="fa-solid fa-xmark"></i></div>
+                        <div class="stat-info">
+                            <h3>Not Responded</h3>
+                            <p id="notRespondedCount">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-grid" style="margin-top: 2rem;">
+                    <!-- Responded -->
+                    <div class="list-container responded-list" style="--delay: 0.4s">
+                        <div class="list-header">
+                            <h2><i class="fa-solid fa-circle-check"></i> Responded</h2>
+                            <div class="header-actions">
+                                <span class="badge" id="respondedBadge">0</span>
+                                <button class="copy-btn" id="copyResponded" title="Copy List"><i class="fa-regular fa-copy"></i></button>
+                            </div>
+                        </div>
+                        <ul id="respondedUl" class="student-list"></ul>
                     </div>
 
-                    <!-- Not Responded List -->
-                    <div class="list-card">
-                        <div class="list-header not-responded-header">
-                            <div>
-                                <h3>Not Responded <span class="badge" id="notRespondedBadge">0</span></h3>
-                                <small>Incomplete / Missing</small>
+                    <!-- Not Responded -->
+                    <div class="list-container not-responded-list" style="--delay: 0.5s">
+                        <div class="list-header">
+                            <h2><i class="fa-solid fa-circle-xmark"></i> Not Responded</h2>
+                            <div class="header-actions">
+                                <span class="badge" id="notRespondedBadge">0</span>
+                                <button class="copy-btn" id="copyNotResponded" title="Copy List"><i class="fa-regular fa-copy"></i></button>
                             </div>
-                            <button class="copy-btn" id="copyNotResponded" title="Copy List"><i
-                                    class="fa-regular fa-copy"></i></button>
                         </div>
-                        <ul id="notRespondedUl" class="student-list">
-                            <!-- Items -->
-                        </ul>
+                        <ul id="notRespondedUl" class="student-list"></ul>
                     </div>
                 </div>
             </section>
         </section>
 
-        <div class="list-container not-responded-list" style="--delay: 0.5s">
-            <div class="list-header">
-                <h2><i class="fa-solid fa-circle-xmark"></i> Not Responded</h2>
-                <div class="header-actions">
-                    <span class="badge" id="notRespondedBadge">0</span>
-                    <button class="copy-btn" id="copyNotResponded" title="Copy List"><i
-                            class="fa-regular fa-copy"></i></button>
-                </div>
-            </div>
-            <ul id="notRespondedUl" class="student-list">
-                <!-- Items go here -->
-            </ul>
-        </div>
-        </section>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
