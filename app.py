@@ -125,9 +125,55 @@ def analyze_dataframe(df):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        return redirect(url_for('about'))
+    return render_template('index.html', view='auth')
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    
+    if User.query.filter_by(username=username).first():
+        return jsonify({"error": "User already exists"}), 400
+    
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    new_user = User(username=username, password=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"success": "Account created successfully"})
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    user = User.query.filter_by(username=username).first()
+    
+    if user and check_password_hash(user.password, password):
+        login_user(user)
+        return jsonify({"success": "Logged in successfully"})
+    return jsonify({"error": "Invalid credentials"}), 401
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+@app.route('/about')
+@login_required
+def about():
+    return render_template('index.html', view='about')
+
+@app.route('/tracker')
+@login_required
+def tracker():
+    return render_template('index.html', view='tracker')
 
 @app.route('/check', methods=['POST'])
+@login_required
 def check_responses():
     print("DEBUG: Received /check request")
     df = None
