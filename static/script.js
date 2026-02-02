@@ -61,14 +61,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Auto-login if saved
-    const savedUser = localStorage.getItem('gTrackUser');
-    if (savedUser) {
-        displayUsername.textContent = savedUser;
-        showView('app'); // Skip to app if logged in
-    } else {
-        showView('login');
-    }
+    // Auto-login via session check
+    fetch('/session')
+        .then(res => res.json())
+        .then(data => {
+            if (data.logged_in) {
+                displayUsername.textContent = data.username;
+                showView('app');
+            } else {
+                showView('login');
+            }
+        })
+        .catch(() => showView('login'));
 
     // --- Page 1: Auth Tab Logic ---
     tabLogin.addEventListener('click', () => {
@@ -86,12 +90,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Login Action
-    btnLogin.addEventListener('click', () => {
+    btnLogin.addEventListener('click', async () => {
         const name = usernameInput.value.trim();
         const pass = passwordInput.value.trim();
 
         if (name && pass) {
-            loginUser(name);
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: name, password: pass })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    loginUser(data.username);
+                } else {
+                    showError(data.error || "Login failed");
+                }
+            } catch (err) {
+                showError("Network error during login");
+            }
         } else {
             showInputError(usernameInput);
             if (!pass) showInputError(passwordInput);
@@ -99,14 +117,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Signup Action
-    btnSignup.addEventListener('click', () => {
+    btnSignup.addEventListener('click', async () => {
         const name = newUsername.value.trim();
         const email = newEmail.value.trim();
         const pass = newPassword.value.trim();
 
         if (name && email && pass) {
-            // Mock signup - just login
-            loginUser(name);
+            try {
+                const response = await fetch('/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: name, email: email, password: pass })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showSuccess("Account created successfully! Please log in.");
+                    // Switch to login tab
+                    tabLogin.click();
+                    // Pre-fill username
+                    usernameInput.value = name;
+                } else {
+                    showError(data.error || "Signup failed");
+                }
+            } catch (err) {
+                showError("Network error during signup");
+            }
         } else {
             if (!name) showInputError(newUsername);
             if (!email) showInputError(newEmail);
@@ -115,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function loginUser(name) {
-        localStorage.setItem('gTrackUser', name);
         displayUsername.textContent = name;
         showView('about'); // Page 1 -> Page 2
     }
@@ -131,8 +165,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Logout Action
-    btnLogout.addEventListener('click', () => {
-        localStorage.removeItem('gTrackUser');
+    btnLogout.addEventListener('click', async () => {
+        try {
+            await fetch('/logout', { method: 'POST' });
+        } catch (e) { }
         showView('login');
     });
 
@@ -245,6 +281,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyRespondedBtn = document.getElementById('copyResponded');
     const copyNotRespondedBtn = document.getElementById('copyNotResponded');
 
+    // Master List Elements
+    const masterListInput = document.getElementById('masterListInput');
+
+    // Missing Elements
+    const missingCountEl = document.getElementById('missingCount');
+    const missingBadge = document.getElementById('missingBadge');
+    const missingUl = document.getElementById('missingUl');
+    const copyMissingBtn = document.getElementById('copyMissing');
+    const btnExport = document.getElementById('btnExport');
+
+    // ... (rest of early defs)
+
     // Helper to clear errors
     const clearError = () => {
         const existingError = document.querySelector('.error-msg');
@@ -259,18 +307,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const showError = (message) => {
         clearError();
         const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-msg';
+        errorDiv.className = 'error-msg alert-msg';
         errorDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>${message}</span>`;
-        mainInput.appendChild(errorDiv);
+        // Find best place to insert (before first input group in active form)
+        const activeForm = document.querySelector('.auth-form-container:not(.hidden)') || mainInput;
+        activeForm.prepend(errorDiv);
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    // Helper to show success
+    const showSuccess = (message) => {
+        clearError();
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-msg alert-msg';
+        successDiv.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
+        const activeForm = document.querySelector('.auth-form-container:not(.hidden)') || mainInput;
+        activeForm.prepend(successDiv);
+        successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
 
     // Helper to copy list
     const copyList = (items, btn) => {
         if (!items || items.length === 0) return;
 
-        // Extract names if items are objects
-        const names = items.map(item => typeof item === 'object' ? item.name : item);
-        const text = names.join('\n');
+        let text = "";
+        if (typeof items[0] === 'object') {
+            // For objects (Incomplete), copy name + missing
+            text = items.map(i => `${i.name} (Missing: ${i.missing.join(', ')})`).join('\n');
+        } else {
+            text = items.join('\n');
+        }
 
         navigator.clipboard.writeText(text).then(() => {
             const originalHTML = btn.innerHTML;
@@ -281,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    let currentData = null;
+    let currentInputData = null; // Store input to re-use for export
 
     checkBtn.addEventListener('click', async () => {
         // Add visual punch on click
@@ -293,6 +359,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let bodyBase = null;
         let headers = {};
 
+        // Prepare Master List
+        const masterListText = masterListInput.value.trim();
+        const masterList = masterListText ? masterListText.split('\n').map(s => s.trim()).filter(s => s) : [];
+
         if (isFileMode) {
             if (!selectedFile) {
                 showError("Please upload a file first.");
@@ -300,8 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const formData = new FormData();
             formData.append('file', selectedFile);
+            formData.append('master_list', JSON.stringify(masterList));
             bodyBase = formData;
-            // No content-type header for FormData (browser sets it with boundary)
+            currentInputData = { type: 'file', data: formData };
         } else {
             const url = sheetUrlInput.value.trim();
             if (!url) {
@@ -312,15 +383,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 showError("That doesn't look like a valid Google Sheet URL.");
                 return;
             }
-            bodyBase = JSON.stringify({ url: url });
+            const payload = { url: url, master_list: masterList };
+            bodyBase = JSON.stringify(payload);
             headers['Content-Type'] = 'application/json';
+            currentInputData = { type: 'json', data: payload, headers: headers };
         }
 
         resultsSection.classList.add('hidden');
         loadingSection.classList.remove('hidden');
         checkBtn.disabled = true;
         checkBtn.innerHTML = '<span>Processing...</span>';
-        currentData = null;
 
         // Reset Slider Position on new check
         if (resultsSlider) {
@@ -342,12 +414,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || "An unexpected error occurred.");
             }
 
-            currentData = data;
-
             // Populate Results
-            totalCountEl.textContent = data.total_students;
+            totalCountEl.textContent = data.total_students; // Total expected (if master list) or total rows
             respondedCountEl.textContent = data.responded_count;
-            notRespondedCountEl.textContent = data.not_responded_count;
+            notRespondedCountEl.textContent = data.not_responded_count; // Incomplete
+
+            // New Missing Stats
+            const missingCount = data.missing_from_master ? data.missing_from_master.length : 0;
+            missingCountEl.textContent = missingCount;
+            missingBadge.textContent = missingCount;
 
             respondedBadge.textContent = data.responded_count;
             notRespondedBadge.textContent = data.not_responded_count;
@@ -360,6 +435,10 @@ document.addEventListener('DOMContentLoaded', () => {
             renderTable('respondedTableBody', data.responded_list, true);
             renderTable('notRespondedTableBody', data.not_responded_list, false);
 
+            // New: Populate Missing List
+            const missingUl = document.getElementById('missingUl');
+            if (missingUl) renderList(missingUl, data.missing_from_master || []);
+
             document.getElementById('respondedTableTotal').textContent = data.responded_count;
             document.getElementById('notRespondedTableTotal').textContent = data.not_responded_count;
 
@@ -368,12 +447,59 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsSection.classList.remove('hidden');
             resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+            // Store for copy buttons to access if needed (though we pull from DOM usually or re-access)
+            currentData = data;
+
         } catch (err) {
             loadingSection.classList.add('hidden');
             showError(err.message);
         } finally {
             checkBtn.disabled = false;
-            checkBtn.innerHTML = '<span>Check Responses</span> <i class="fa-solid fa-arrow-right"></i>';
+            checkBtn.innerHTML = '<span>Analyze Responses</span> <i class="fa-solid fa-arrow-right"></i>';
+        }
+    });
+
+    // --- Export Logic ---
+    btnExport.addEventListener('click', async () => {
+        if (!currentInputData) return;
+
+        const originalBtnContent = btnExport.innerHTML;
+        btnExport.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Exporting...';
+        btnExport.disabled = true;
+
+        try {
+            // We need to send the same data to /export
+            // Ensure headers and body are set correctly
+            let exportBody = currentInputData.data;
+            let exportHeaders = currentInputData.headers || {};
+
+            const response = await fetch('/export', {
+                method: 'POST',
+                headers: exportHeaders,
+                body: exportBody
+            });
+
+            if (!response.ok) {
+                const errJson = await response.json();
+                throw new Error(errJson.error || "Export failed.");
+            }
+
+            // Handle Blob
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'g_tracker_report.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+        } catch (err) {
+            showError("Export Error: " + err.message);
+        } finally {
+            btnExport.innerHTML = originalBtnContent;
+            btnExport.disabled = false;
         }
     });
 
@@ -386,8 +512,43 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentData) copyList(currentData.not_responded_list, copyNotRespondedBtn);
     });
 
+    if (copyMissingBtn) {
+        copyMissingBtn.addEventListener('click', () => {
+            if (currentData && currentData.missing_from_master) {
+                copyList(currentData.missing_from_master, copyMissingBtn);
+            }
+        });
+    }
+
+    function renderList(ulElement, items) {
+        ulElement.innerHTML = '';
+        if (!items || items.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = "None found";
+            li.style.fontStyle = "italic";
+            li.style.opacity = "0.5";
+            ulElement.appendChild(li);
+            return;
+        }
+
+        items.forEach(item => {
+            const li = document.createElement('li');
+            if (typeof item === 'object' && item.name) {
+                let html = `<span>${item.name}</span>`;
+                if (item.missing && item.missing.length > 0) {
+                    html += `<br><small style="color: #fca5a5; font-size: 0.8rem;">Missing: ${item.missing.join(', ')}</small>`;
+                }
+                li.innerHTML = html;
+            } else {
+                li.textContent = item;
+            }
+            ulElement.appendChild(li);
+        });
+    }
+
     function renderTable(tbodyId, items, isResponded) {
         const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
         tbody.innerHTML = '';
 
         if (items.length === 0) {
@@ -401,17 +562,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isResponded) {
                 // item is just a name string
                 tr.innerHTML = `
-                    <td><strong>${item}</strong></td>
-                    <td><span class="status-pill status-res">Completed</span></td>
-                    <td><i class="fa-solid fa-circle-check" style="color:var(--success)"></i></td>
-                `;
+                        <td><strong>${item}</strong></td>
+                        <td><span class="status-pill status-res">Completed</span></td>
+                        <td><i class="fa-solid fa-circle-check" style="color:var(--success)"></i></td>
+                    `;
             } else {
                 // item is an object { name, missing }
                 tr.innerHTML = `
-                    <td><strong>${item.name}</strong></td>
-                    <td style="font-size:0.85rem; color:var(--text-secondary)">${item.missing.join(', ')}</td>
-                    <td><span class="status-pill status-nr">Pending</span></td>
-                `;
+                        <td><strong>${item.name}</strong></td>
+                        <td style="font-size:0.85rem; color:var(--text-secondary)">${item.missing.join(', ')}</td>
+                        <td><span class="status-pill status-nr">Pending</span></td>
+                    `;
             }
             tbody.appendChild(tr);
         });
@@ -497,3 +658,4 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.save(`G-Tracker_Report_${new Date().getTime()}.pdf`);
     });
 });
+

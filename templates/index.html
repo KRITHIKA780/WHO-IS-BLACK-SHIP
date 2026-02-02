@@ -159,10 +159,23 @@
                     </div>
                 </div>
 
-                <button id="checkBtn" class="primary-btn" style="margin-top: 1.5rem;">
-                    <span>Analyze Responses</span>
-                    <i class="fa-solid fa-bolt-lightning"></i>
-                </button>
+                <!-- Master List Section -->
+                <div class="master-list-section" style="margin-top: 1.5rem; text-align: left;">
+                    <label class="section-label"
+                        style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: rgba(255,255,255,0.7);">
+                        <i class="fa-solid fa-clipboard-list"></i> Master Student List (Optional)
+                    </label>
+                    <textarea id="masterListInput"
+                        placeholder="Paste list of all student names here (one per line) to detect who is completely missing..."
+                        style="width: 100%; height: 100px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; color: white; padding: 1rem; resize: vertical; font-family: 'Outfit', sans-serif;"></textarea>
+                </div>
+
+                <div class="action-buttons" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button id="checkBtn" class="primary-btn" style="flex: 2;">
+                        <span>Analyze Responses</span>
+                        <i class="fa-solid fa-bolt-lightning"></i>
+                    </button>
+                </div>
             </main>
 
             <div id="loading" class="hidden">
@@ -171,6 +184,13 @@
             </div>
 
             <section id="results" class="results-section hidden">
+                <div class="results-actions" style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                    <button id="btnExport" class="secondary-btn"
+                        style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
+                        <i class="fa-solid fa-file-excel"></i> Export to Excel
+                    </button>
+                </div>
+
                 <div class="stats-container">
                     <div class="stat-card">
                         <h3>Total Students</h3>
@@ -181,11 +201,17 @@
                         <p id="respondedCount">0</p>
                     </div>
                     <div class="stat-card not-responded">
-                        <h3>Not Responded</h3>
+                        <h3>Incomplete</h3>
                         <p id="notRespondedCount">0</p>
+                    </div>
+                    <div class="stat-card missing"
+                        style="border-top: 3px solid #ef4444; background: rgba(239, 68, 68, 0.1);">
+                        <h3>Missing</h3>
+                        <p id="missingCount">0</p>
                     </div>
                 </div>
 
+<<<<<<< HEAD
                 <div class="export-controls">
                     <button id="downloadExcel" class="export-btn excel">
                         <i class="fa-solid fa-file-excel"></i>
@@ -271,8 +297,50 @@
                                         <span class="total-value" id="notRespondedTableTotal">0</span>
                                     </div>
                                 </div>
+=======
+                <div class="results-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                    <!-- Responded List -->
+                    <div class="list-card responded-card">
+                        <div class="list-header responded-header">
+                            <div>
+                                <h3>Responded <span class="badge" id="respondedBadge">0</span></h3>
+                                <small>All fields filled</small>
+                            </div>
+                            <button class="copy-btn" id="copyResponded" title="Copy List"><i
+                                    class="fa-regular fa-copy"></i></button>
+                        </div>
+                        <ul id="respondedUl" class="student-list">
+                            <!-- Items -->
+                        </ul>
+                    </div>
+
+                    <!-- Incomplete List (Filled but missing fields) -->
+                    <div class="list-card not-responded-card">
+                        <div class="list-header not-responded-header">
+                            <div>
+                                <h3>Incomplete <span class="badge" id="notRespondedBadge">0</span></h3>
+                                <small>Missing specific answers</small>
+>>>>>>> ea01a9c (feat: implement strict backend auth and refined signup flow)
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Missing List (Not in sheet at all) -->
+                    <div class="list-card missing-card"
+                        style="border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(20, 20, 30, 0.6);">
+                        <div class="list-header missing-header"
+                            style="border-bottom: 1px solid rgba(239, 68, 68, 0.3);">
+                            <div>
+                                <h3 style="color: #fca5a5;">Missing <span class="badge" id="missingBadge"
+                                        style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">0</span></h3>
+                                <small>Not found in submissions</small>
+                            </div>
+                            <button class="copy-btn" id="copyMissing" title="Copy List" style="color: #fca5a5;"><i
+                                    class="fa-regular fa-copy"></i></button>
+                        </div>
+                        <ul id="missingUl" class="student-list">
+                            <!-- Items -->
+                        </ul>
                     </div>
                 </div>
             </section>
