@@ -103,7 +103,7 @@ def analyze_dataframe(df):
             
             valid_answers = [str(x).strip() for x in row_answers if pd.notna(x) and str(x).strip() not in ["", "nan", "None", "NaN"]]
             
-            # STRICT CHECK: Must fill ALL answer columns
+            # STRICT CHECK: If any identified answer column is missing, they are marked as missing.
             if len(valid_answers) == len(answer_cols):
                 has_response = True
 
@@ -245,7 +245,47 @@ def check_responses():
              return jsonify(results), 400
         return jsonify(results)
     
-    return jsonify({"error": "Processing failed"}), 500
+@app.route('/export', methods=['POST'])
+@login_required
+def export_excel():
+    try:
+        data = request.json
+        items = data.get('items', [])
+        type_name = data.get('type', 'data')
+        
+        if not items:
+            return jsonify({"error": "No data to export"}), 400
+
+        # Create DataFrame
+        export_data = []
+        for item in items:
+            if isinstance(item, dict):
+                export_data.append({
+                    "Name": item.get('name', 'Unknown'),
+                    "Missing Fields": ", ".join(item.get('missing', []))
+                })
+            else:
+                export_data.append({"Name": item})
+        
+        export_df = pd.DataFrame(export_data)
+        
+        # Save to memory
+        from io import BytesIO
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            export_df.to_excel(writer, index=False, sheet_name='BlackShip_Extract')
+        
+        output.seek(0)
+        
+        from flask import send_file
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=f"BlackShip_{type_name}_export.xlsx"
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

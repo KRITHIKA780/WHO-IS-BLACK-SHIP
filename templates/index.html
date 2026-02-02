@@ -4,16 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-Tracker | Premium Analytics Engine</title>
+    <title>Black Ship | Intelligence Engine</title>
 
     <!-- Meta Tags -->
-    <meta name="description"
-        content="Advanced Google Sheet response tracker with premium analytics and real-time verification.">
+    <meta name="description" content="Advanced algorithmic form analysis and tracking system.">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <!-- Icons -->
@@ -23,126 +23,245 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
-<body>
-    <!-- Premium Background Engine -->
-    <div class="bg-canvas">
-        <div class="bg-orb orb-1"></div>
-        <div class="bg-orb orb-2"></div>
-        <div class="bg-orb orb-3"></div>
+<body class="view-{{ view }}">
+    <!-- Dynamic Background Engine -->
+    <div class="void-canvas">
+        <div class="aurora-glow"></div>
+        <div class="grid-overlay"></div>
     </div>
 
-    <div class="container">
+    <!-- Main Navigation -->
+    {% if current_user.is_authenticated %}
+    <nav class="cyber-nav">
+        <div class="nav-brand">G.</div>
+        <div class="nav-menu">
+            <a href="{{ url_for('about') }}" class="nav-link {% if view == 'about' %}active{% endif %}"
+                data-tooltip="System Intel">
+                <i class="fa-solid fa-microchip"></i>
+            </a>
+            <a href="{{ url_for('tracker') }}" class="nav-link {% if view == 'tracker' %}active{% endif %}"
+                data-tooltip="Hunter">
+                <i class="fa-solid fa-satellite-dish"></i>
+            </a>
+            <div class="nav-divider"></div>
+            <a href="{{ url_for('logout') }}" class="nav-link danger" data-tooltip="Disconnect">
+                <i class="fa-solid fa-power-off"></i>
+            </a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="main-viewport">
         <!-- Hero Header -->
-        <header class="hero">
-            <h1 class="logo">G-Tracker<span class="dot">.</span></h1>
-            <p class="subtitle">Next-Gen Form Analysis</p>
+        <header class="cyber-header">
+            <h1 class="glitch-text" data-text="BLACK SHIP">BLACK SHIP</h1>
+            <div class="status-line">
+                <span class="status-dot"></span>
+                <p class="status-text">SYSTEM ONLINE // AWAITING INPUT</p>
+            </div>
         </header>
 
-        <!-- Configuration Panel -->
-        <main id="config-panel" class="glass-card view-transition">
-            <div id="errorBanner" class="error-banner hidden">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span id="errorText">System message...</span>
+        {% if view == 'auth' %}
+        <!-- AUTHENTICATION MODULE -->
+        <main id="auth-panel" class="cyber-card entrance-anim">
+            <div class="card-glow"></div>
+            <div class="auth-switcher">
+                <button class="switch-btn active" id="btnShowLogin">ACCESS</button>
+                <button class="switch-btn" id="btnShowRegister">INITIATE</button>
+                <div class="switch-slider"></div>
             </div>
 
-            <!-- Input Method Toggle -->
-            <div class="tab-container">
-                <button class="tab-btn active" id="btnLinkMode"><i class="fa-solid fa-link"></i> Sheet URL</button>
-                <button class="tab-btn" id="btnFileMode"><i class="fa-solid fa-file-csv"></i> Local File</button>
-            </div>
-
-            <!-- Mode: Link -->
-            <div id="modeLink" class="input-field-wrapper">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="sheetUrl" placeholder="Enter Google Sheet URL..." autocomplete="off">
-            </div>
-
-            <!-- Mode: File Upload -->
-            <div id="modeFile" class="hidden">
-                <div class="file-drop-area" id="dropArea">
-                    <i class="fa-solid fa-cloud-arrow-up file-icon"></i>
-                    <p class="file-text">Click or drag <span>CSV/Excel</span> file</p>
-                    <p class="file-sub">Maximum file size: 10MB</p>
-                    <input type="file" id="fileInput" class="hidden" accept=".csv, .xlsx, .xls">
+            <div id="login-form-box" class="form-container">
+                <div class="cyber-input-group">
+                    <input type="text" id="loginUser" required>
+                    <label>Operative ID</label>
+                    <i class="fa-solid fa-hashtag input-icon"></i>
+                    <div class="input-line"></div>
                 </div>
-                <div id="filePreview" class="file-preview hidden">
-                    <i class="fa-solid fa-file-circle-check"></i>
-                    <span id="fileName">document.csv</span>
-                    <i class="fa-solid fa-trash-can remove-file" id="removeFile"></i>
+                <div class="cyber-input-group">
+                    <input type="password" id="loginPass" required>
+                    <label>Security Key</label>
+                    <i class="fa-solid fa-fingerprint input-icon"></i>
+                    <div class="input-line"></div>
                 </div>
+                <button class="cyber-btn primary" id="loginBtn">
+                    <span class="btn-text">ESTABLISH UPLINK</span>
+                    <span class="btn-glitch"></span>
+                </button>
             </div>
 
-            <button class="btn-premium" id="checkBtn">
-                <span>Start Verification</span>
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
-            </button>
+            <div id="register-form-box" class="form-container hidden">
+                <div class="cyber-input-group">
+                    <input type="text" id="regUser" required>
+                    <label>New Designation</label>
+                    <i class="fa-solid fa-plus input-icon"></i>
+                    <div class="input-line"></div>
+                </div>
+                <div class="cyber-input-group">
+                    <input type="password" id="regPass" required>
+                    <label>Set Passphrase</label>
+                    <i class="fa-solid fa-key input-icon"></i>
+                    <div class="input-line"></div>
+                </div>
+                <button class="cyber-btn secondary" id="registerBtn">
+                    <span class="btn-text">REGISTER IDENTITY</span>
+                    <span class="btn-glitch"></span>
+                </button>
+            </div>
 
-            <div id="loading" class="loader-wrapper hidden">
-                <div class="shimmer-loader"></div>
+            <div id="authError" class="cyber-toast error hidden">
+                <div class="toast-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <span id="authErrorText">Error...</span>
             </div>
         </main>
 
-        <!-- Dashboard Section -->
-        <section id="results" class="hidden view-transition" style="margin-top: 3rem;">
-            <!-- Analytics Overview -->
-            <div class="stats-grid">
-                <div class="stat-item stat-total">
-                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                    <div class="stat-label">Total Volume</div>
-                    <div class="stat-value" id="totalCount">0</div>
+        {% elif view == 'about' %}
+        <!-- INTEL MODULE -->
+        <main id="about-panel" class="cyber-card large entrance-anim">
+            <div class="card-glow"></div>
+            <div class="intel-content">
+                <div class="intel-header">
+                    <h2>TACTICAL OVERVIEW</h2>
+                    <div class="header-decoration"></div>
                 </div>
-                <div class="stat-item stat-found">
-                    <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
-                    <div class="stat-label">Verified Resp.</div>
-                    <div class="stat-value" id="respondedCount">0</div>
+
+                <p class="intel-brief">
+                    The Black Ship protocol utilizes advanced heuristics to cross-reference data streams.
+                    It bridges the void between expected attendance and actual signal input.
+                </p>
+
+                <div class="specs-grid">
+                    <div class="spec-card">
+                        <div class="spec-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <h3>Hyper-Speed</h3>
+                        <p>Instantaneous processing of massive datasets.</p>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-icon"><i class="fa-solid fa-eye"></i></div>
+                        <h3>Deep Vision</h3>
+                        <p>Pattern recognition for fuzzy matching names.</p>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-icon"><i class="fa-solid fa-lock"></i></div>
+                        <h3>Void Safe</h3>
+                        <p>Data remains local. No external leaks.</p>
+                    </div>
                 </div>
-                <div class="stat-item stat-missing">
-                    <div class="stat-icon"><i class="fa-solid fa-ghost"></i></div>
-                    <div class="stat-label">Outstanding</div>
-                    <div class="stat-value" id="notRespondedCount">0</div>
+
+                <a href="{{ url_for('tracker') }}" class="cyber-btn primary center-btn">
+                    <span class="btn-text">ENGAGE TRACKER</span>
+                </a>
+            </div>
+        </main>
+
+        {% elif view == 'tracker' %}
+        <!-- TRACKER MODULE -->
+        <main id="config-panel" class="cyber-card large entrance-anim">
+            <div class="card-glow"></div>
+
+            <div id="errorBanner" class="cyber-toast error hidden">
+                <div class="toast-icon"><i class="fa-solid fa-bug"></i></div>
+                <span id="errorText">System Malfunction</span>
+            </div>
+
+            <div class="mode-selector">
+                <button class="mode-btn active" id="btnLinkMode">
+                    <i class="fa-solid fa-link"></i> NETWORK LINK
+                </button>
+                <button class="mode-btn" id="btnFileMode">
+                    <i class="fa-solid fa-database"></i> LOCAL DATA
+                </button>
+            </div>
+
+            <!-- Mode: Link -->
+            <div id="modeLink" class="input-section">
+                <div class="cyber-input-group large">
+                    <input type="text" id="sheetUrl" required placeholder=" ">
+                    <label>Target URL Endpoint</label>
+                    <i class="fa-solid fa-crosshairs input-icon"></i>
+                    <div class="input-line"></div>
                 </div>
             </div>
 
-            <!-- Data Breakdown -->
-            <div class="data-lists">
-                <!-- Verified List -->
-                <div class="glass-card content-panel">
-                    <div class="panel-header">
-                        <h2><i class="fa-solid fa-check-double" style="color: hsl(var(--neon-green));"></i> Verified
-                        </h2>
-                        <span class="badge" id="respondedBadge">0</span>
+            <!-- Mode: File Upload -->
+            <div id="modeFile" class="input-section hidden">
+                <div class="holo-dropzone" id="dropArea">
+                    <div class="drop-content">
+                        <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                        <h3>UPLOAD FILE</h3>
+                        <p>Drag & Drop or Click to Select</p>
                     </div>
-                    <ul id="respondedUl" class="item-list"></ul>
-                    <button class="copy-btn" id="copyResponded"
-                        style="margin-top: 1rem; width: 100%; border: none; background: hsla(210, 40%, 98%, 0.05); padding: 0.5rem; border-radius: 8px; color: var(--text-secondary); cursor: pointer;">
-                        <i class="fa-solid fa-copy"></i> Export List
-                    </button>
+                    <input type="file" id="fileInput" class="hidden" accept=".csv, .xlsx, .xls">
                 </div>
-
-                <!-- Missing List -->
-                <div class="glass-card content-panel">
-                    <div class="panel-header">
-                        <h2><i class="fa-solid fa-circle-xmark" style="color: hsl(var(--neon-purple));"></i> Missing
-                        </h2>
-                        <span class="badge" id="notRespondedBadge">0</span>
-                    </div>
-                    <ul id="notRespondedUl" class="item-list"></ul>
-                    <button class="copy-btn" id="copyNotResponded"
-                        style="margin-top: 1rem; width: 100%; border: none; background: hsla(210, 40%, 98%, 0.05); padding: 0.5rem; border-radius: 8px; color: var(--text-secondary); cursor: pointer;">
-                        <i class="fa-solid fa-copy"></i> Export List
-                    </button>
+                <div id="filePreview" class="file-manifest hidden">
+                    <div class="manifest-icon"><i class="fa-solid fa-file-code"></i></div>
+                    <span id="fileName">data.csv</span>
+                    <button class="delete-btn" id="removeFile"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
 
-            <!-- Intelligence Logs -->
-            <div id="debugTarget" class="glass-card hidden"
-                style="margin-top: 2rem; padding: 1.5rem; font-size: 0.9rem;">
-                <!-- Analysis details will be injected here -->
+            <button class="cyber-btn action" id="checkBtn">
+                <span class="btn-text">START ANALYSIS</span>
+                <div class="loading-spinner hidden" id="btnSpinner"></div>
+            </button>
+
+            <div id="loading" class="scan-overlay hidden">
+                <div class="scanner-line"></div>
+                <div class="scanner-text">ANALYZING DATA...</div>
+            </div>
+        </main>
+
+        <!-- DASHBOARD RESULTS -->
+        <section id="results" class="results-dashboard hidden">
+            <!-- HUD Stats -->
+            <div class="hud-grid">
+                <div class="hud-panel total">
+                    <div class="hud-label">TOTAL STUDENTS</div>
+                    <div class="hud-value" id="totalCount">0</div>
+                    <div class="hud-bar"></div>
+                </div>
+                <div class="hud-panel verified">
+                    <div class="hud-label">RESPONDED</div>
+                    <div class="hud-value" id="respondedCount">0</div>
+                    <div class="hud-bar"></div>
+                </div>
+                <div class="hud-panel missing">
+                    <div class="hud-label">NOT RESPONDED</div>
+                    <div class="hud-value" id="notRespondedCount">0</div>
+                    <div class="hud-bar"></div>
+                </div>
+            </div>
+
+            <!-- Data Feeds -->
+            <div class="feed-container">
+                <!-- Verified Feed -->
+                <div class="data-feed verified-feed">
+                    <div class="feed-header">
+                        <h3><i class="fa-solid fa-circle-check"></i> RESPONDED LIST</h3>
+                        <span class="feed-badge" id="respondedBadge">0</span>
+                    </div>
+                    <ul id="respondedUl" class="feed-list"></ul>
+                    <button class="feed-action" id="copyResponded">
+                        <i class="fa-solid fa-file-excel"></i> DOWNLOAD EXCEL
+                    </button>
+                </div>
+
+                <!-- Missing Feed -->
+                <div class="data-feed missing-feed">
+                    <div class="feed-header">
+                        <h3><i class="fa-solid fa-circle-xmark"></i> MISSING LIST</h3>
+                        <span class="feed-badge" id="notRespondedBadge">0</span>
+                    </div>
+                    <ul id="notRespondedUl" class="feed-list"></ul>
+                    <button class="feed-action" id="copyNotResponded">
+                        <i class="fa-solid fa-file-excel"></i> DOWNLOAD EXCEL
+                    </button>
+                </div>
             </div>
         </section>
+        {% endif %}
     </div>
 
-    <!-- Core Engine -->
     <script src="/static/script.js"></script>
 </body>
 
