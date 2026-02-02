@@ -4,250 +4,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Black Ship | Intelligence Engine</title>
-
-    <!-- Meta Tags -->
-    <meta name="description" content="Advanced algorithmic form analysis and tracking system.">
-
-    <!-- Fonts -->
+    <title>G-Tracker | Form Response Analyzer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-
-    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Custom Style -->
-    <link rel="stylesheet" href="/static/style.css">
 </head>
 
-<body class="view-{{ view }}">
-    <!-- Dynamic Background Engine -->
-    <div class="void-canvas">
-        <div class="aurora-glow"></div>
-        <div class="grid-overlay"></div>
+<body>
+    <div class="background-globes">
+        <div class="globe globe-1"></div>
+        <div class="globe globe-2"></div>
+        <div class="globe globe-3"></div>
     </div>
 
-    <!-- Main Navigation -->
-    {% if current_user.is_authenticated %}
-    <nav class="cyber-nav">
-        <div class="nav-brand">BLACK SHIP</div>
-        <div class="nav-menu">
-            <a href="{{ url_for('tracker') }}" class="nav-link {% if view == 'tracker' %}active{% endif %}"
-                data-tooltip="Hunter">
-                <i class="fa-solid fa-satellite-dish"></i>
-            </a>
-            <div class="nav-divider"></div>
-            <a href="{{ url_for('logout') }}" class="nav-link danger" data-tooltip="Disconnect">
-                <i class="fa-solid fa-power-off"></i>
-            </a>
-        </div>
-    </nav>
-    {% endif %}
-
-    <div class="main-viewport">
-        <!-- Hero Header -->
-        <header class="cyber-header">
-            <h1 class="glitch-text" data-text="BLACK SHIP">BLACK SHIP</h1>
-            <div class="status-line">
-                <span class="status-dot"></span>
-                <p class="status-text">SYSTEM ONLINE // AWAITING INPUT</p>
-            </div>
+    <div class="container">
+        <header class="hero">
+            <h1 class="logo">G-Tracker <span class="dot">.</span></h1>
+            <p class="subtitle">Separate the active from the inactive. Instantly.</p>
         </header>
 
-        <!-- 1. AUTHENTICATION MODULE -->
-        <main id="auth-panel" class="cyber-card panel-view {% if view == 'auth' %}active{% endif %}" data-panel="auth">
-            <div class="card-glow"></div>
-            <div class="auth-switcher">
-                <button class="switch-btn active" id="btnShowLogin">LOGIC</button>
-                <button class="switch-btn" id="btnShowRegister">INITIATE</button>
-                <div class="switch-slider"></div>
-            </div>
-
-            <div id="login-form-box" class="form-container">
-                <div class="cyber-input-group">
-                    <input type="text" id="loginUser" required>
-                    <label>Operative ID</label>
-                    <i class="fa-solid fa-hashtag input-icon"></i>
-                    <div class="input-line"></div>
-                </div>
-                <div class="cyber-input-group">
-                    <input type="password" id="loginPass" required>
-                    <label>Security Key</label>
-                    <i class="fa-solid fa-fingerprint input-icon"></i>
-                    <div class="input-line"></div>
-                </div>
-                <button class="cyber-btn primary" id="loginBtn">
-                    <span class="btn-text">PROCEED</span>
-                    <span class="btn-glitch"></span>
-                </button>
-            </div>
-
-            <div id="register-form-box" class="form-container hidden">
-                <div class="cyber-input-group">
-                    <input type="text" id="regUser" required>
-                    <label>New Designation</label>
-                    <i class="fa-solid fa-plus input-icon"></i>
-                    <div class="input-line"></div>
-                </div>
-                <div class="cyber-input-group">
-                    <input type="password" id="regPass" required>
-                    <label>Set Passphrase</label>
-                    <i class="fa-solid fa-key input-icon"></i>
-                    <div class="input-line"></div>
-                </div>
-                <button class="cyber-btn secondary" id="registerBtn">
-                    <span class="btn-text">REGISTER IDENTITY</span>
-                    <span class="btn-glitch"></span>
-                </button>
-            </div>
-
-            <div id="authError" class="cyber-toast error hidden">
-                <div class="toast-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                <span id="authErrorText">Error...</span>
-            </div>
-        </main>
-
-        <!-- 2. METHODS MODULE -->
-        <main id="methods-panel" class="cyber-card large panel-view {% if view == 'methods' %}active{% endif %}"
-            data-panel="methods">
-            <div class="card-glow"></div>
-            <div class="instructions-panel">
-                <div class="hud-label">HOW TO USE BLACK SHIP</div>
-                <p class="view-description">Follow these steps to execute your student data analysis.</p>
-                <ul class="how-to-list">
-                    <li>Paste your <strong>Google Sheet URL</strong> or upload a <strong>Student Manifest</strong>
-                        (.csv/.xlsx).</li>
-                    <li>Ensure your sheet has a column for student names.</li>
-                    <li>Click <strong>START ANALYSIS</strong> to begin the cross-referencing process.</li>
-                    <li>Download the final report as an <strong>Excel file</strong> for your records.</li>
-                </ul>
-                <button class="cyber-btn primary" id="btnToTracker" style="margin-top: 2rem;">
-                    <span class="btn-text">ENGAGE ANALYZER</span>
-                    <span class="btn-glitch"></span>
-                </button>
-            </div>
-        </main>
-
-        <!-- 3. TRACKER MODULE -->
-        <div id="tracker-panel" class="panel-view {% if view == 'tracker' %}active{% endif %}" data-panel="tracker">
-            <main id="config-panel" class="cyber-card large">
-                <div class="card-glow"></div>
-
-                <div id="errorBanner" class="cyber-toast error hidden">
-                    <div class="toast-icon"><i class="fa-solid fa-bug"></i></div>
-                    <span id="errorText">System Malfunction</span>
+        <!-- View 1: Login / Sign Up -->
+        <section id="view-login" class="view-section active">
+            <div class="glass-panel auth-panel">
+                <div class="auth-tabs">
+                    <button id="tabLogin" class="tab-btn active">Login</button>
+                    <button id="tabSignup" class="tab-btn">Sign Up</button>
                 </div>
 
-                <div class="tracker-panel">
-                    <div class="mode-selector">
-                        <button class="mode-btn active" id="btnLinkMode">
-                            <i class="fa-solid fa-link"></i> NETWORK LINK
-                        </button>
-                        <button class="mode-btn" id="btnFileMode">
-                            <i class="fa-solid fa-database"></i> LOCAL DATA
-                        </button>
+                <div id="loginForm" class="auth-form-container">
+                    <h2>Welcome Back</h2>
+                    <p>Access your response tracker</p>
+                    <div class="input-group">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" id="usernameInput" placeholder="Username" autocomplete="off">
                     </div>
-
-                    <!-- Mode: Link -->
-                    <div id="modeLink" class="input-section">
-                        <div class="cyber-input-group large">
-                            <input type="text" id="sheetUrl" required placeholder=" ">
-                            <label>Target URL Endpoint</label>
-                            <i class="fa-solid fa-crosshairs input-icon"></i>
-                            <div class="input-line"></div>
-                        </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="passwordInput" placeholder="Password">
                     </div>
-
-                    <!-- Mode: File Upload -->
-                    <div id="modeFile" class="input-section hidden">
-                        <div class="holo-dropzone" id="dropArea">
-                            <div class="drop-content">
-                                <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
-                                <h3>UPLOAD FILE</h3>
-                                <p>Drag & Drop or Click to Select</p>
-                            </div>
-                            <input type="file" id="fileInput" class="hidden" accept=".csv, .xlsx, .xls">
-                        </div>
-                        <div id="filePreview" class="file-manifest hidden">
-                            <div class="manifest-icon"><i class="fa-solid fa-file-code"></i></div>
-                            <span id="fileName">data.csv</span>
-                            <button class="delete-btn" id="removeFile"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                    </div>
-
-                    <button class="cyber-btn action" id="checkBtn">
-                        <span class="btn-text">START ANALYSIS</span>
-                        <div class="loading-spinner hidden" id="btnSpinner"></div>
+                    <button id="btnLogin" class="primary-btn">
+                        <span>Sign In</span>
+                        <i class="fa-solid fa-right-to-bracket"></i>
                     </button>
+                </div>
 
-                    <div id="loading" class="scan-overlay hidden">
-                        <div class="scanner-line"></div>
-                        <div class="scanner-text">ANALYZING DATA...</div>
+                <div id="signupForm" class="auth-form-container hidden">
+                    <h2>Join G-Tracker</h2>
+                    <p>Create a new account</p>
+                    <div class="input-group">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" id="newUsername" placeholder="Full Name" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-envelope input-icon"></i>
+                        <input type="email" id="newEmail" placeholder="Email Address">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="newPassword" placeholder="Create Password">
+                    </div>
+                    <button id="btnSignup" class="primary-btn">
+                        <span>Create Account</span>
+                        <i class="fa-solid fa-user-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 2: About & How it Works -->
+        <section id="view-about" class="view-section hidden">
+            <div class="glass-panel about-panel">
+                <h2>About G-Tracker <i class="fa-solid fa-wand-magic-sparkles"></i></h2>
+                <div class="about-content">
+                    <p>G-Tracker is your intelligent companion for managing Google Form submissions. We help you bridge
+                        the gap between "sent" and "received" with ultra-fast analysis.</p>
+
+                    <h3 style="margin-top: 2rem; color: var(--accent-cyan);">How it Works</h3>
+                    <div class="about-grid">
+                        <div class="process-step">
+                            <i class="fa-brands fa-google-drive"></i>
+                            <h4>Step 1: Link</h4>
+                            <p>Paste the Google Sheets URL where responses are stored.</p>
+                        </div>
+                        <div class="process-step">
+                            <i class="fa-solid fa-file-csv"></i>
+                            <h4>Step 2: Upload</h4>
+                            <p>Or simply drag and drop your Excel/CSV export directly.</p>
+                        </div>
+                        <div class="process-step">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            <h4>Step 3: Analyze</h4>
+                            <p>We'll detect missing names and incomplete submissions instantly.</p>
+                        </div>
                     </div>
                 </div>
+                <button id="btnFromAbout" class="primary-btn" style="margin-top: 2rem;">
+                    <span>Go to Dashboard</span>
+                    <i class="fa-solid fa-rocket"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- View 3: Dashboard (The App) -->
+        <section id="view-app" class="view-section hidden">
+            <div class="welcome-banner">
+                <h3>System Ready, <span id="displayUsername">User</span> <i class="fa-solid fa-bolt"></i></h3>
+                <button id="btnLogout" class="logout-btn" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+
+            <main class="glass-panel main-input">
+                <div class="mode-toggle">
+                    <button class="toggle-btn active" id="btnLinkMode">
+                        <i class="fa-brands fa-google-drive"></i>
+                        <span>Cloud Link</span>
+                    </button>
+                    <button class="toggle-btn" id="btnFileMode">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>Local File</span>
+                    </button>
+                </div>
+
+                <div id="modeLink" class="input-mode">
+                    <div class="input-group">
+                        <i class="fa-solid fa-link input-icon"></i>
+                        <input type="text" id="sheetUrl" placeholder="Enter Google Sheet URL..." autocomplete="off">
+                    </div>
+                </div>
+
+                <div id="modeFile" class="input-mode hidden">
+                    <div class="file-drop-area" id="dropArea">
+                        <i class="fa-solid fa-file-arrow-up file-icon"
+                            style="font-size: 2.5rem; color: var(--accent-cyan);"></i>
+                        <p>Drop Excel/CSV here or <span>Browse</span></p>
+                        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" hidden>
+                    </div>
+                    <div id="filePreview" class="file-preview hidden">
+                        <i class="fa-solid fa-file-circle-check"></i>
+                        <span id="fileName">data.xlsx</span>
+                        <i class="fa-solid fa-trash remove-file" id="removeFile"
+                            style="cursor:pointer; margin-left: auto;"></i>
+                    </div>
+                </div>
+
+                <button id="checkBtn" class="primary-btn" style="margin-top: 1.5rem;">
+                    <span>Analyze Responses</span>
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </button>
             </main>
 
-            <!-- DASHBOARD RESULTS -->
-            <section id="results" class="results-dashboard hidden">
-                <!-- HUD Stats -->
-                <div class="hud-grid">
-                    <div class="hud-panel total">
-                        <div class="hud-label">TOTAL STUDENTS</div>
-                        <div class="hud-value" id="totalCount">0</div>
-                        <div class="hud-bar"></div>
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p>Analyzing spreadsheet data...</p>
+            </div>
+
+            <section id="results" class="results-section hidden">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Total Students</h3>
+                        <p id="totalCount">0</p>
                     </div>
-                    <div class="hud-panel verified">
-                        <div class="hud-label">RESPONDED</div>
-                        <div class="hud-value" id="respondedCount">0</div>
-                        <div class="hud-bar"></div>
+                    <div class="stat-card responded">
+                        <h3>Responded</h3>
+                        <p id="respondedCount">0</p>
                     </div>
-                    <div class="hud-panel missing">
-                        <div class="hud-label">NOT RESPONDED</div>
-                        <div class="hud-value" id="notRespondedCount">0</div>
-                        <div class="hud-bar"></div>
+                    <div class="stat-card not-responded">
+                        <h3>Not Responded</h3>
+                        <p id="notRespondedCount">0</p>
                     </div>
                 </div>
 
-                <!-- Data Feeds -->
-                <div class="feed-container">
-                    <!-- Verified Feed -->
-                    <div class="data-feed verified-feed">
-                        <div class="feed-header">
-                            <h3><i class="fa-solid fa-circle-check"></i> RESPONDED LIST</h3>
-                            <span class="feed-badge" id="respondedBadge">0</span>
+                <div class="results-grid">
+                    <!-- Responded List -->
+                    <div class="list-card responded-card">
+                        <div class="list-header responded-header">
+                            <div>
+                                <h3>Responded <span class="badge" id="respondedBadge">0</span></h3>
+                                <small>All fields filled</small>
+                            </div>
+                            <button class="copy-btn" id="copyResponded" title="Copy List"><i
+                                    class="fa-regular fa-copy"></i></button>
                         </div>
-                        <ul id="respondedUl" class="feed-list"></ul>
-                        <button class="feed-action" id="copyResponded">
-                            <i class="fa-solid fa-file-excel"></i> DOWNLOAD EXCEL
-                        </button>
+                        <ul id="respondedUl" class="student-list">
+                            <!-- Items -->
+                        </ul>
                     </div>
 
-                    <!-- Missing Feed -->
-                    <div class="data-feed missing-feed">
-                        <div class="feed-header">
-                            <h3><i class="fa-solid fa-circle-xmark"></i> MISSING LIST</h3>
-                            <span class="feed-badge" id="notRespondedBadge">0</span>
+                    <!-- Not Responded List -->
+                    <div class="list-card not-responded-card">
+                        <div class="list-header not-responded-header">
+                            <div>
+                                <h3>Not Responded <span class="badge" id="notRespondedBadge">0</span></h3>
+                                <small>Incomplete / Missing</small>
+                            </div>
+                            <button class="copy-btn" id="copyNotResponded" title="Copy List"><i
+                                    class="fa-regular fa-copy"></i></button>
                         </div>
-                        <ul id="notRespondedUl" class="feed-list"></ul>
-                        <button class="feed-action" id="copyNotResponded">
-                            <i class="fa-solid fa-file-excel"></i> DOWNLOAD EXCEL
-                        </button>
+                        <ul id="notRespondedUl" class="student-list">
+                            <!-- Items -->
+                        </ul>
                     </div>
                 </div>
             </section>
-        </div>
-
+        </section>
     </div>
 
-    <footer class="cyber-footer">
-        <div class="footer-line"></div>
-        <p>DEVELOPER: <span class="dev-name">KRITHIKA N</span></p>
-    </footer>
-
-    <script src="/static/script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>

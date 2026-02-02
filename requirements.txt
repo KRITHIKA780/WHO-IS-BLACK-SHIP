@@ -2,6 +2,3 @@ flask
 pandas
 requests
 openpyxl
-flask-sqlalchemy
-flask-login
-bcrypt

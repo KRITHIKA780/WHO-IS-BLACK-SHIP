@@ -1,375 +1,411 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Authentication Logic ---
-    const loginBtn = document.getElementById('loginBtn');
-    const registerBtn = document.getElementById('registerBtn');
-    const loginUser = document.getElementById('loginUser');
-    const loginPass = document.getElementById('loginPass');
-    const regUser = document.getElementById('regUser');
-    const regPass = document.getElementById('regPass');
-    const authError = document.getElementById('authError');
-    const authErrorText = document.getElementById('authErrorText');
+    // Views
+    const viewLogin = document.getElementById('view-login');
+    const viewAbout = document.getElementById('view-about');
+    const viewApp = document.getElementById('view-app');
 
-    const btnShowLogin = document.getElementById('btnShowLogin');
-    const btnShowRegister = document.getElementById('btnShowRegister');
-    const loginFormBox = document.getElementById('login-form-box');
-    const registerFormBox = document.getElementById('register-form-box');
+    // Auth Elements
+    const tabLogin = document.getElementById('tabLogin');
+    const tabSignup = document.getElementById('tabSignup');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
 
-    // Switcher Logic with Slide Effect
-    if (btnShowLogin && btnShowRegister) {
-        btnShowLogin.addEventListener('click', () => {
-            btnShowLogin.classList.add('active');
-            btnShowRegister.classList.remove('active');
-            loginFormBox.classList.remove('hidden');
-            registerFormBox.classList.add('hidden');
-            clearAuthError();
+    const usernameInput = document.getElementById('usernameInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const btnLogin = document.getElementById('btnLogin');
+
+    const newUsername = document.getElementById('newUsername');
+    const newEmail = document.getElementById('newEmail');
+    const newPassword = document.getElementById('newPassword');
+    const btnSignup = document.getElementById('btnSignup');
+
+    const btnFromAbout = document.getElementById('btnFromAbout');
+    const displayUsername = document.getElementById('displayUsername');
+    const btnLogout = document.getElementById('btnLogout');
+
+    // Link/File Inputs
+    const sheetUrlInput = document.getElementById('sheetUrl');
+    const checkBtn = document.getElementById('checkBtn');
+
+    // Sections
+    const loadingSection = document.getElementById('loading');
+    const resultsSection = document.getElementById('results');
+    const totalCountEl = document.getElementById('totalCount');
+    const respondedCountEl = document.getElementById('respondedCount');
+    const notRespondedCountEl = document.getElementById('notRespondedCount');
+
+    const mainInput = document.querySelector('.main-input');
+
+    // Navigation Logic
+    const showView = (viewName) => {
+        // Hide all and remove active
+        [viewLogin, viewAbout, viewApp].forEach(el => {
+            el.classList.add('hidden');
+            el.classList.remove('active');
         });
 
-        btnShowRegister.addEventListener('click', () => {
-            btnShowRegister.classList.add('active');
-            btnShowLogin.classList.remove('active');
-            registerFormBox.classList.remove('hidden');
-            loginFormBox.classList.add('hidden');
-            clearAuthError();
-        });
-    }
+        // Show the target view
+        let target;
+        if (viewName === 'login') target = viewLogin;
+        if (viewName === 'about') target = viewAbout;
+        if (viewName === 'app') target = viewApp;
 
-    const clearAuthError = () => {
-        if (authError) authError.classList.add('hidden');
-    };
-
-    const showAuthError = (msg) => {
-        if (authErrorText) {
-            authErrorText.innerHTML = msg;
-            authError.classList.remove('hidden');
-            setTimeout(() => authError.classList.add('hidden'), 3000);
+        if (target) {
+            target.classList.remove('hidden');
+            target.classList.add('active');
         }
     };
 
-    async function switchView(targetUrl) {
-        try {
-            // Determine target panel
-            let targetPanelName = 'auth';
-            if (targetUrl.includes('/methods')) targetPanelName = 'methods';
-            if (targetUrl.includes('/tracker')) targetPanelName = 'tracker';
+    // Auto-login if saved
+    const savedUser = localStorage.getItem('gTrackUser');
+    if (savedUser) {
+        displayUsername.textContent = savedUser;
+        showView('app'); // Skip to app if logged in
+    } else {
+        showView('login');
+    }
 
-            const panels = document.querySelectorAll('.panel-view');
-            const currentPanel = document.querySelector('.panel-view.active');
-            const targetPanel = document.querySelector(`.panel-view[data-panel="${targetPanelName}"]`);
+    // --- Page 1: Auth Tab Logic ---
+    tabLogin.addEventListener('click', () => {
+        tabLogin.classList.add('active');
+        tabSignup.classList.remove('active');
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+    });
 
-            if (!targetPanel) {
-                window.location.href = targetUrl;
+    tabSignup.addEventListener('click', () => {
+        tabSignup.classList.add('active');
+        tabLogin.classList.remove('active');
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+    });
+
+    // Login Action
+    btnLogin.addEventListener('click', () => {
+        const name = usernameInput.value.trim();
+        const pass = passwordInput.value.trim();
+
+        if (name && pass) {
+            loginUser(name);
+        } else {
+            showInputError(usernameInput);
+            if (!pass) showInputError(passwordInput);
+        }
+    });
+
+    // Signup Action
+    btnSignup.addEventListener('click', () => {
+        const name = newUsername.value.trim();
+        const email = newEmail.value.trim();
+        const pass = newPassword.value.trim();
+
+        if (name && email && pass) {
+            // Mock signup - just login
+            loginUser(name);
+        } else {
+            if (!name) showInputError(newUsername);
+            if (!email) showInputError(newEmail);
+            if (!pass) showInputError(newPassword);
+        }
+    });
+
+    function loginUser(name) {
+        localStorage.setItem('gTrackUser', name);
+        displayUsername.textContent = name;
+        showView('about'); // Page 1 -> Page 2
+    }
+
+    function showInputError(inputEl) {
+        inputEl.style.borderColor = "var(--danger)";
+        setTimeout(() => inputEl.style.borderColor = "var(--glass-border)", 2000);
+    }
+
+    // About -> App Action
+    btnFromAbout.addEventListener('click', () => {
+        showView('app');
+    });
+
+    // Logout Action
+    btnLogout.addEventListener('click', () => {
+        localStorage.removeItem('gTrackUser');
+        showView('login');
+    });
+
+    // List Elements
+    const respondedUl = document.getElementById('respondedUl');
+    const notRespondedUl = document.getElementById('notRespondedUl');
+    const respondedBadge = document.getElementById('respondedBadge');
+    const notRespondedBadge = document.getElementById('notRespondedBadge');
+
+    // Toggle & Inputs
+    const btnLinkMode = document.getElementById('btnLinkMode');
+    const btnFileMode = document.getElementById('btnFileMode');
+    const modeLink = document.getElementById('modeLink');
+    const modeFile = document.getElementById('modeFile');
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileNameEl = document.getElementById('fileName');
+    const removeFile = document.getElementById('removeFile');
+
+    let isFileMode = false;
+    let selectedFile = null;
+
+    // --- Toggle Logic ---
+    btnLinkMode.addEventListener('click', () => setMode(false));
+    btnFileMode.addEventListener('click', () => setMode(true));
+
+    function setMode(isFile) {
+        isFileMode = isFile;
+        // Buttons
+        btnLinkMode.classList.toggle('active', !isFile);
+        btnFileMode.classList.toggle('active', isFile);
+
+        // Sections
+        if (isFile) {
+            modeLink.classList.add('hidden');
+            modeFile.classList.remove('hidden');
+        } else {
+            modeLink.classList.remove('hidden');
+            modeFile.classList.add('hidden');
+        }
+        clearError();
+    }
+
+    // --- File Handling ---
+    dropArea.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+    // Drag & Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    dropArea.addEventListener('dragover', () => dropArea.classList.add('dragover'));
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+
+    dropArea.addEventListener('drop', (e) => {
+        dropArea.classList.remove('dragover');
+        handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+        if (!file) return;
+        if (!file.name.match(/\.(csv|xlsx|xls)$/i)) {
+            showError("Invalid file type. Please upload Excel or CSV.");
+            return;
+        }
+        selectedFile = file;
+        fileNameEl.textContent = file.name;
+        dropArea.classList.add('hidden');
+        filePreview.classList.remove('hidden');
+        clearError();
+    }
+
+    removeFile.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectedFile = null;
+        fileInput.value = '';
+        dropArea.classList.remove('hidden');
+        filePreview.classList.add('hidden');
+    });
+
+    // Copy Buttons
+    const copyRespondedBtn = document.getElementById('copyResponded');
+    const copyNotRespondedBtn = document.getElementById('copyNotResponded');
+
+    // Helper to clear errors
+    const clearError = () => {
+        const existingError = document.querySelector('.error-msg');
+        if (existingError) existingError.remove();
+
+        // Also clear debug info if exists
+        const existingDebug = document.querySelector('.debug-info');
+        if (existingDebug) existingDebug.remove();
+    };
+
+    // Helper to show error
+    const showError = (message) => {
+        clearError();
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-msg';
+        errorDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>${message}</span>`;
+        mainInput.appendChild(errorDiv);
+    };
+
+    // Helper to copy list
+    const copyList = (items, btn) => {
+        if (!items || items.length === 0) return;
+        const text = items.join('\n');
+        navigator.clipboard.writeText(text).then(() => {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+            }, 1000);
+        });
+    };
+
+    let currentData = null;
+
+    checkBtn.addEventListener('click', async () => {
+        // Reset UI
+        clearError();
+        let bodyBase = null;
+        let headers = {};
+
+        if (isFileMode) {
+            if (!selectedFile) {
+                showError("Please upload a file first.");
                 return;
             }
-
-            if (currentPanel) {
-                currentPanel.classList.remove('active', 'entrance-anim');
-                currentPanel.classList.add('exit-anim');
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            bodyBase = formData;
+            // No content-type header for FormData (browser sets it with boundary)
+        } else {
+            const url = sheetUrlInput.value.trim();
+            if (!url) {
+                showError("Please enter a Google Sheet URL.");
+                return;
             }
+            if (!url.includes("docs.google.com/spreadsheets") && !url.includes("drive.google")) {
+                showError("That doesn't look like a valid Google Sheet URL.");
+                return;
+            }
+            bodyBase = JSON.stringify({ url: url });
+            headers['Content-Type'] = 'application/json';
+        }
 
-            // Small delay for exit if it exists
-            targetPanel.classList.remove('exit-anim');
-            targetPanel.classList.add('active', 'entrance-anim');
+        resultsSection.classList.add('hidden');
+        loadingSection.classList.remove('hidden');
+        checkBtn.disabled = true;
+        checkBtn.innerHTML = '<span>Processing...</span>';
+        currentData = null;
 
-            // Update Nav brand color if needed or active links
-            document.querySelectorAll('.nav-link').forEach(link => {
-                if (link.getAttribute('href') === targetUrl) link.classList.add('active');
-                else link.classList.remove('active');
+        try {
+            const response = await fetch('/check', {
+                method: 'POST',
+                headers: headers,
+                body: bodyBase,
             });
 
-            // Update URL
-            history.pushState({}, '', targetUrl);
+            const data = await response.json();
 
-            // Re-initialize logic
-            initTracker();
-            bindNavButtons();
-        } catch (err) {
-            console.error("View switch failed:", err);
-            window.location.href = targetUrl; // Fallback
-        }
-    }
-
-    if (loginBtn) {
-        loginBtn.addEventListener('click', async () => {
-            const username = loginUser.value;
-            const password = loginPass.value;
-
-            loginBtn.classList.add('loading');
-
-            if (!username || !password) {
-                loginBtn.classList.remove('loading');
-                return showAuthError("CREDENTIALS MISSING");
+            if (!response.ok) {
+                throw new Error(data.error || "An unexpected error occurred.");
             }
 
-            try {
-                const res = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    switchView('/methods');
-                } else {
-                    showAuthError(data.error.toUpperCase());
-                }
-            } catch (err) {
-                showAuthError("CONNECTION FAILURE");
-            } finally {
-                loginBtn.classList.remove('loading');
-            }
-        });
-    }
-
-    if (registerBtn) {
-        registerBtn.addEventListener('click', async () => {
-            const username = regUser.value;
-            const password = regPass.value;
-
-            if (!username || !password) return showAuthError("FIELDS REQUIRED");
-
-            try {
-                const res = await fetch('/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    btnShowLogin.click();
-                    showAuthError("IDENTITY REGISTERED. PLEASE LOG IN.");
-                } else {
-                    showAuthError(data.error.toUpperCase());
-                }
-            } catch (err) {
-                showAuthError("REGISTRATION FAILED");
-            }
-        });
-    }
-
-    function bindNavButtons() {
-        const btnToTracker = document.getElementById('btnToTracker');
-        if (btnToTracker) {
-            btnToTracker.addEventListener('click', () => switchView('/tracker'));
-        }
-    }
-
-    // --- Tracker Logic ---
-    function initTracker() {
-        const checkBtn = document.getElementById('checkBtn');
-        if (!checkBtn) return;
-
-        const sheetUrlInput = document.getElementById('sheetUrl');
-        const loadingSection = document.getElementById('loading');
-        const resultsSection = document.getElementById('results');
-        const errorBanner = document.getElementById('errorBanner');
-        const errorText = document.getElementById('errorText');
-        const btnSpinner = document.getElementById('btnSpinner');
-
-        // Stats
-        const totalCountEl = document.getElementById('totalCount');
-        const respondedCountEl = document.getElementById('respondedCount');
-        const notRespondedCountEl = document.getElementById('notRespondedCount');
-        const respondedBadge = document.getElementById('respondedBadge');
-        const notRespondedBadge = document.getElementById('notRespondedBadge');
-        const respondedUl = document.getElementById('respondedUl');
-        const notRespondedUl = document.getElementById('notRespondedUl');
-
-        // Toggles
-        const btnLinkMode = document.getElementById('btnLinkMode');
-        const btnFileMode = document.getElementById('btnFileMode');
-        const modeLink = document.getElementById('modeLink');
-        const modeFile = document.getElementById('modeFile');
-        const dropArea = document.getElementById('dropArea');
-        const fileInput = document.getElementById('fileInput');
-        const filePreview = document.getElementById('filePreview');
-        const fileNameEl = document.getElementById('fileName');
-        const removeFileBtn = document.getElementById('removeFile');
-
-        let isFileMode = false;
-        let selectedFile = null;
-        let currentData = null;
-
-        const setMode = (isFile) => {
-            isFileMode = isFile;
-            btnLinkMode.classList.toggle('active', !isFile);
-            btnFileMode.classList.toggle('active', isFile);
-            if (isFile) {
-                modeLink.classList.add('hidden');
-                modeFile.classList.remove('hidden');
-            } else {
-                modeFile.classList.add('hidden');
-                modeLink.classList.remove('hidden');
-            }
-            clearError();
-        };
-
-        btnLinkMode.addEventListener('click', () => setMode(false));
-        btnFileMode.addEventListener('click', () => setMode(true));
-
-        dropArea.addEventListener('click', () => fileInput.click());
-        dropArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropArea.style.borderColor = 'var(--nebula-pink)';
-        });
-        dropArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropArea.style.borderColor = 'rgba(255,255,255,0.2)';
-        });
-        dropArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropArea.style.borderColor = 'rgba(255,255,255,0.2)';
-            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-        });
-
-        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-
-        const handleFile = (file) => {
-            if (!file) return;
-            selectedFile = file;
-            fileNameEl.textContent = file.name;
-            dropArea.classList.add('hidden');
-            filePreview.classList.remove('hidden');
-        };
-
-        removeFileBtn.addEventListener('click', () => {
-            selectedFile = null;
-            fileInput.value = '';
-            dropArea.classList.remove('hidden');
-            filePreview.classList.add('hidden');
-        });
-
-        checkBtn.addEventListener('click', async () => {
-            clearError();
-            resultsSection.classList.add('hidden');
-            let body;
-            let headers = {};
-
-            if (isFileMode) {
-                if (!selectedFile) return showError("UPLOAD MANIFEST REQUIRED");
-                body = new FormData();
-                body.append('file', selectedFile);
-            } else {
-                const url = sheetUrlInput.value.trim();
-                if (!url) return showError("TARGET URL REQUIRED");
-                body = JSON.stringify({ url });
-                headers['Content-Type'] = 'application/json';
-            }
-
-            loadingSection.classList.remove('hidden');
-            if (btnSpinner) btnSpinner.classList.remove('hidden');
-
-            // Artificial delay for "Scanning" effect
-            await new Promise(r => setTimeout(r, 800));
-
-            try {
-                const res = await fetch('/check', { method: 'POST', headers, body });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error);
-                renderDashboard(data);
-            } catch (err) {
-                showError(err.message.toUpperCase());
-            } finally {
-                loadingSection.classList.add('hidden');
-                if (btnSpinner) btnSpinner.classList.add('hidden');
-            }
-        });
-
-        function renderDashboard(data) {
             currentData = data;
 
-            // Animate numbers
-            animateValue(totalCountEl, 0, data.total_students, 1000);
-            animateValue(respondedCountEl, 0, data.responded_count, 1000);
-            animateValue(notRespondedCountEl, 0, data.not_responded_count, 1000);
+            // Populate Results
+            totalCountEl.textContent = data.total_students;
+            respondedCountEl.textContent = data.responded_count;
+            notRespondedCountEl.textContent = data.not_responded_count;
 
             respondedBadge.textContent = data.responded_count;
             notRespondedBadge.textContent = data.not_responded_count;
 
-            renderList(respondedUl, data.responded_list, 'verified');
-            renderList(notRespondedUl, data.not_responded_list, 'missing');
+            // Show Debug Info
+            if (data.debug_info) {
+                const debugDiv = document.createElement('div');
+                debugDiv.className = 'debug-info';
 
-            resultsSection.classList.remove('hidden');
-            resultsSection.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function animateValue(obj, start, end, duration) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = Math.floor(progress * (end - start) + start);
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-
-        function renderList(ul, items, type) {
-            ul.innerHTML = '';
-            items.forEach(item => {
-                const li = document.createElement('li');
-                const name = typeof item === 'object' ? item.name : item;
-                // Add some cyber decoration
-                li.innerHTML = `<span style="color: ${type === 'verified' ? 'var(--signal-green)' : 'var(--alert-red)'}">[${type === 'verified' ? 'OK' : '!!'}]</span> ${name}`;
-                ul.appendChild(li);
-            });
-        }
-
-        function showError(msg) {
-            errorText.textContent = msg;
-            errorBanner.classList.remove('hidden');
-            setTimeout(() => errorBanner.classList.add('hidden'), 5000);
-        }
-
-        function clearError() {
-            if (errorBanner) errorBanner.classList.add('hidden');
-        }
-
-        // --- Export Support (Excel) ---
-        const copyRespondedBtn = document.getElementById('copyResponded');
-        const copyNotRespondedBtn = document.getElementById('copyNotResponded');
-
-        if (copyRespondedBtn) {
-            copyRespondedBtn.addEventListener('click', () => {
-                if (!currentData) return;
-                exportExcel(currentData.responded_list, 'verified');
-            });
-        }
-
-        if (copyNotRespondedBtn) {
-            copyNotRespondedBtn.addEventListener('click', () => {
-                if (!currentData) return;
-                exportExcel(currentData.not_responded_list, 'missing');
-            });
-        }
-
-        async function exportExcel(items, type) {
-            try {
-                const res = await fetch('/export', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ items, type })
+                let rowsHtml = '';
+                data.debug_info.preview_rows.forEach(row => {
+                    let extra = '';
+                    if (row.status === "Not Responded" && row.missing_cols && row.missing_cols.length > 0) {
+                        extra = `<br><small style="color: #f87171;">Missing: ${row.missing_cols.join(', ')}</small>`;
+                    }
+                    rowsHtml += `<li><strong>${row.name}</strong>: ${row.status} (${row.answers_found}/${row.total_required}) ${extra}</li>`;
                 });
 
-                if (!res.ok) throw new Error("Export failed");
+                debugDiv.innerHTML = `
+                    <p><i class="fa-solid fa-magic-wand-sparkles"></i> <strong>Analysis Info:</strong></p>
+                    <ul>
+                        <li>Using <strong>"${data.debug_info.detected_name_column}"</strong> as Name.</li>
+                        <li>Checking <strong>${data.debug_info.detected_answer_columns.length}</strong> required columns.</li>
+                    </ul>
+                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:10px 0;">
+                    <p><strong>First Few Rows Check:</strong></p>
+                    <ul>${rowsHtml}</ul>
+                `;
+                // Insert after stats
+                const resultsGrid = document.querySelector('.results-grid');
+                // Remove old debug info if any
+                const oldDebug = document.querySelector('.debug-info');
+                if (oldDebug) oldDebug.remove();
 
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `BlackShip_${type}_export.xlsx`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            } catch (err) {
-                showError("EXPORT FAILED: " + err.message);
+                resultsGrid.parentNode.insertBefore(debugDiv, resultsGrid);
             }
+
+            // Populate Lists
+            renderList(respondedUl, data.responded_list);
+            renderList(notRespondedUl, data.not_responded_list);
+
+            // Show Results
+            loadingSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (err) {
+            loadingSection.classList.add('hidden');
+            showError(err.message);
+        } finally {
+            checkBtn.disabled = false;
+            checkBtn.innerHTML = '<span>Check Responses</span> <i class="fa-solid fa-arrow-right"></i>';
         }
+    });
+
+    // Copy Event Listeners
+    copyRespondedBtn.addEventListener('click', () => {
+        if (currentData) copyList(currentData.responded_list, copyRespondedBtn);
+    });
+
+    copyNotRespondedBtn.addEventListener('click', () => {
+        if (currentData) copyList(currentData.not_responded_list, copyNotRespondedBtn);
+    });
+
+    function renderList(ulElement, items) {
+        ulElement.innerHTML = '';
+        if (items.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = "None found";
+            li.style.fontStyle = "italic";
+            li.style.opacity = "0.5";
+            ulElement.appendChild(li);
+            return;
+        }
+
+        items.forEach(item => {
+            const li = document.createElement('li');
+
+            if (typeof item === 'object' && item.name) {
+                // It's a student object (Not Responded likely)
+                let html = `<span>${item.name}</span>`;
+                if (item.missing && item.missing.length > 0) {
+                    html += `<br><small style="color: #f87171; font-size: 0.8rem;">Missing: ${item.missing.join(', ')}</small>`;
+                }
+                li.innerHTML = html;
+                li.style.flexDirection = "column";
+                li.style.alignItems = "flex-start";
+            } else {
+                // It's a string (Responded)
+                li.textContent = item;
+            }
+
+            ulElement.appendChild(li);
+        });
     }
 
-    // Initialize on first load
-    initTracker();
-    bindNavButtons();
+    // Input animation listener
+    sheetUrlInput.addEventListener('focus', () => {
+        clearError();
+    });
 });

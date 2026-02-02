@@ -1,34 +1,10 @@
 import re
-import os
 import pandas as pd
 import requests
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask import Flask, render_template, request, jsonify
 from io import StringIO
-from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'g-tracker-cyber-secret-2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-login_manager = LoginManager(app)
-login_manager.login_view = 'index'
-
-# --- Models ---
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
-
-with app.app_context():
-    db.create_all()
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 def extract_sheet_id(url):
     """Extracts the Google Sheet ID from the URL."""
@@ -103,7 +79,7 @@ def analyze_dataframe(df):
             
             valid_answers = [str(x).strip() for x in row_answers if pd.notna(x) and str(x).strip() not in ["", "nan", "None", "NaN"]]
             
-            # STRICT CHECK: If any identified answer column is missing, they are marked as missing.
+            # STRICT CHECK: Must fill ALL answer columns
             if len(valid_answers) == len(answer_cols):
                 has_response = True
 
@@ -149,57 +125,10 @@ def analyze_dataframe(df):
 
 @app.route('/')
 def index():
-    if current_user.is_authenticated:
-        return redirect(url_for('methods'))
-    return render_template('index.html', view='auth')
-
-@app.route('/register', methods=['POST'])
-def register():
-    data = request.json
-    username = data.get('username')
-    password = data.get('password')
-    
-    if User.query.filter_by(username=username).first():
-        return jsonify({"error": "User already exists"}), 400
-    
-    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-    new_user = User(username=username, password=hashed_password)
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({"success": "Account created successfully"})
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.json
-    username = data.get('username')
-    password = data.get('password')
-    user = User.query.filter_by(username=username).first()
-    
-    if user and check_password_hash(user.password, password):
-        login_user(user)
-        return jsonify({"success": "Logged in successfully"})
-    return jsonify({"error": "Invalid credentials"}), 401
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
-@app.route('/methods')
-@login_required
-def methods():
-    return render_template('index.html', view='methods')
-
-@app.route('/tracker')
-@login_required
-def tracker():
-    return render_template('index.html', view='tracker')
+    return render_template('index.html')
 
 @app.route('/check', methods=['POST'])
-@login_required
 def check_responses():
-    print("DEBUG: Received /check request")
     df = None
     
     # Handle File Upload
@@ -245,47 +174,7 @@ def check_responses():
              return jsonify(results), 400
         return jsonify(results)
     
-@app.route('/export', methods=['POST'])
-@login_required
-def export_excel():
-    try:
-        data = request.json
-        items = data.get('items', [])
-        type_name = data.get('type', 'data')
-        
-        if not items:
-            return jsonify({"error": "No data to export"}), 400
-
-        # Create DataFrame
-        export_data = []
-        for item in items:
-            if isinstance(item, dict):
-                export_data.append({
-                    "Name": item.get('name', 'Unknown'),
-                    "Missing Fields": ", ".join(item.get('missing', []))
-                })
-            else:
-                export_data.append({"Name": item})
-        
-        export_df = pd.DataFrame(export_data)
-        
-        # Save to memory
-        from io import BytesIO
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            export_df.to_excel(writer, index=False, sheet_name='BlackShip_Extract')
-        
-        output.seek(0)
-        
-        from flask import send_file
-        return send_file(
-            output,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            as_attachment=True,
-            download_name=f"BlackShip_{type_name}_export.xlsx"
-        )
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return jsonify({"error": "Processing failed"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
