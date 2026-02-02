@@ -21,14 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const respondedCountEl = document.getElementById('respondedCount');
     const notRespondedCountEl = document.getElementById('notRespondedCount');
 
-    const mainInput = document.querySelector('.main-input');
+    // Error containers
+    const loginError = document.getElementById('loginError');
+    const appError = document.getElementById('appError');
 
     // Navigation Logic
     const showView = (viewName) => {
-        [viewLogin, viewAbout, viewApp].forEach(el => el.classList.add('hidden'));
-        if (viewName === 'login') viewLogin.classList.remove('hidden');
-        if (viewName === 'about') viewAbout.classList.remove('hidden');
-        if (viewName === 'app') viewApp.classList.remove('hidden');
+        console.log("Showing view:", viewName);
+        if (viewLogin) viewLogin.classList.toggle('hidden', viewName !== 'login');
+        if (viewAbout) viewAbout.classList.toggle('hidden', viewName !== 'about');
+        if (viewApp) viewApp.classList.toggle('hidden', viewName !== 'app');
     };
 
     // Auto-login if saved
@@ -147,23 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyRespondedBtn = document.getElementById('copyResponded');
     const copyNotRespondedBtn = document.getElementById('copyNotResponded');
 
-    // Helper to clear errors
-    const clearError = () => {
-        const existingError = document.querySelector('.error-msg');
-        if (existingError) existingError.remove();
-
-        // Also clear debug info if exists
-        const existingDebug = document.querySelector('.debug-info');
-        if (existingDebug) existingDebug.remove();
+    // Helper to show error
+    const showError = (message, view = 'app') => {
+        console.error("Error:", message);
+        const container = view === 'login' ? loginError : appError;
+        if (container) {
+            container.innerHTML = `<div class="error-msg"><i class="fa-solid fa-triangle-exclamation"></i> <span>${message}</span></div>`;
+            container.classList.remove('hidden');
+        } else {
+            alert(message);
+        }
     };
 
-    // Helper to show error
-    const showError = (message) => {
-        clearError();
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-msg';
-        errorDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>${message}</span>`;
-        mainInput.appendChild(errorDiv);
+    const clearError = () => {
+        if (loginError) { loginError.innerHTML = ''; loginError.classList.add('hidden'); }
+        if (appError) { appError.innerHTML = ''; appError.classList.add('hidden'); }
     };
 
     // Helper to copy list
@@ -241,7 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Show Debug Info
             if (data.debug_info) {
-                const debugDiv = document.createElement('div');
+                const debugDiv = document.getElementById('debugInfoContainer') || document.createElement('div');
+                debugDiv.id = 'debugInfoContainer';
                 debugDiv.className = 'debug-info';
 
                 let rowsHtml = '';
@@ -263,13 +264,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><strong>First Few Rows Check:</strong></p>
                     <ul>${rowsHtml}</ul>
                 `;
-                // Insert after stats
-                const resultsGrid = document.querySelector('.results-grid');
-                // Remove old debug info if any
-                const oldDebug = document.querySelector('.debug-info');
-                if (oldDebug) oldDebug.remove();
-
-                resultsGrid.parentNode.insertBefore(debugDiv, resultsGrid);
+                
+                const debugTarget = document.getElementById('debugTarget');
+                if (debugTarget) {
+                    debugTarget.innerHTML = '';
+                    debugTarget.appendChild(debugDiv);
+                    debugTarget.classList.remove('hidden');
+                }
             }
 
             // Populate Lists
