@@ -11,6 +11,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
@@ -27,48 +32,50 @@
         </header>
 
         <!-- View 1: Login / Sign Up -->
-        <section id="view-login" class="view-section active">
-            <div class="glass-panel auth-panel">
+        <section id="view-login" class="view active">
+            <div class="glass-panel" style="width: 100%; max-width: 450px;">
                 <div class="auth-tabs">
-                    <button id="tabLogin" class="tab-btn active">Login</button>
-                    <button id="tabSignup" class="tab-btn">Sign Up</button>
+                    <button class="auth-tab active" id="tabLogin">Login</button>
+                    <button class="auth-tab" id="tabSignup">Sign Up</button>
                 </div>
 
-                <div id="loginForm" class="auth-form-container">
-                    <h2>Welcome Back</h2>
-                    <p>Access your response tracker</p>
+                <div id="loginForm">
+                    <h1 class="auth-title">Welcome Back</h1>
+                    <p class="auth-subtitle">Access your response tracker</p>
+
                     <div class="input-group">
-                        <i class="fa-solid fa-user input-icon"></i>
-                        <input type="text" id="usernameInput" placeholder="Username" autocomplete="off">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="usernameInput" placeholder="Username">
                     </div>
                     <div class="input-group">
-                        <i class="fa-solid fa-lock input-icon"></i>
+                        <i class="fa-solid fa-lock"></i>
                         <input type="password" id="passwordInput" placeholder="Password">
                     </div>
-                    <button id="btnLogin" class="primary-btn">
-                        <span>Sign In</span>
-                        <i class="fa-solid fa-right-to-bracket"></i>
+
+                    <button class="auth-btn" id="btnLogin">
+                        Sign In <i class="fa-solid fa-arrow-right-to-bracket"></i>
                     </button>
                 </div>
 
-                <div id="signupForm" class="auth-form-container hidden">
-                    <h2>Join G-Tracker</h2>
-                    <p>Create a new account</p>
+                <div id="signupForm" class="hidden">
+                    <h1 class="auth-title">Join G-Tracker</h1>
+                    <p class="auth-subtitle">Create a new account</p>
+
                     <div class="input-group">
-                        <i class="fa-solid fa-user input-icon"></i>
-                        <input type="text" id="newUsername" placeholder="Full Name" autocomplete="off">
+                        <i class="fa-solid fa-circle-user"></i>
+                        <input type="text" id="newUsername" placeholder="Full Name">
                     </div>
                     <div class="input-group">
-                        <i class="fa-solid fa-envelope input-icon"></i>
+                        <i class="fa-solid fa-envelope"></i>
                         <input type="email" id="newEmail" placeholder="Email Address">
                     </div>
                     <div class="input-group">
-                        <i class="fa-solid fa-lock input-icon"></i>
+                        <i class="fa-solid fa-lock"></i>
                         <input type="password" id="newPassword" placeholder="Create Password">
                     </div>
-                    <button id="btnSignup" class="primary-btn">
-                        <span>Create Account</span>
-                        <i class="fa-solid fa-user-plus"></i>
+
+                    <button class="auth-btn" id="btnSignup">
+                        Create Account <i class="fa-solid fa-user-plus"></i>
                     </button>
                 </div>
             </div>
@@ -179,35 +186,93 @@
                     </div>
                 </div>
 
-                <div class="results-grid">
-                    <!-- Responded List -->
-                    <div class="list-card responded-card">
-                        <div class="list-header responded-header">
-                            <div>
-                                <h3>Responded <span class="badge" id="respondedBadge">0</span></h3>
-                                <small>All fields filled</small>
-                            </div>
-                            <button class="copy-btn" id="copyResponded" title="Copy List"><i
-                                    class="fa-regular fa-copy"></i></button>
-                        </div>
-                        <ul id="respondedUl" class="student-list">
-                            <!-- Items -->
-                        </ul>
-                    </div>
+                <div class="export-controls">
+                    <button id="downloadExcel" class="export-btn excel">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Download Excel</span>
+                    </button>
+                    <button id="downloadPDF" class="export-btn pdf">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Download PDF</span>
+                    </button>
+                </div>
 
-                    <!-- Not Responded List -->
-                    <div class="list-card not-responded-card">
-                        <div class="list-header not-responded-header">
-                            <div>
-                                <h3>Not Responded <span class="badge" id="notRespondedBadge">0</span></h3>
-                                <small>Incomplete / Missing</small>
+                <div class="results-tabs">
+                    <button class="res-tab active" id="tabResponded">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Responded</span>
+                    </button>
+                    <button class="res-tab not-filled" id="tabNotResponded">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>Not Responded</span>
+                    </button>
+                </div>
+
+                <div class="results-slider-container">
+                    <div class="results-slider" id="resultsSlider">
+                        <!-- Slide 1: Responded -->
+                        <div class="results-slide">
+                            <div class="list-card responded-card">
+                                <div class="list-header responded-header">
+                                    <div>
+                                        <h3>Responded <span class="badge" id="respondedBadge">0</span></h3>
+                                        <small>All fields filled</small>
+                                    </div>
+                                    <button class="copy-btn" id="copyResponded" title="Copy List"><i
+                                            class="fa-regular fa-copy"></i></button>
+                                </div>
+                                <div class="table-wrapper">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Student Name</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="respondedTableBody">
+                                            <!-- Rows -->
+                                        </tbody>
+                                    </table>
+                                    <div class="table-footer">
+                                        <span class="total-label">Total Responded:</span>
+                                        <span class="total-value" id="respondedTableTotal">0</span>
+                                    </div>
+                                </div>
                             </div>
-                            <button class="copy-btn" id="copyNotResponded" title="Copy List"><i
-                                    class="fa-regular fa-copy"></i></button>
                         </div>
-                        <ul id="notRespondedUl" class="student-list">
-                            <!-- Items -->
-                        </ul>
+
+                        <!-- Slide 2: Not Responded -->
+                        <div class="results-slide">
+                            <div class="list-card not-responded-card">
+                                <div class="list-header not-responded-header">
+                                    <div>
+                                        <h3>Not Responded <span class="badge" id="notRespondedBadge">0</span></h3>
+                                        <small>Incomplete / Missing</small>
+                                    </div>
+                                    <button class="copy-btn" id="copyNotResponded" title="Copy List"><i
+                                            class="fa-regular fa-copy"></i></button>
+                                </div>
+                                <div class="table-wrapper">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Student Name</th>
+                                                <th>Missing Info</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="notRespondedTableBody">
+                                            <!-- Rows -->
+                                        </tbody>
+                                    </table>
+                                    <div class="table-footer">
+                                        <span class="total-label">Total Pending:</span>
+                                        <span class="total-value" id="notRespondedTableTotal">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
