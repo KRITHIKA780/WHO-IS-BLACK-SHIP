@@ -1,72 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Views
-    const viewLogin = document.getElementById('view-login');
-    const viewAbout = document.getElementById('view-about');
-    const viewApp = document.getElementById('view-app');
-
-    // Auth Elements
-    const usernameInput = document.getElementById('usernameInput');
-    const btnLogin = document.getElementById('btnLogin');
-    const btnFromAbout = document.getElementById('btnFromAbout');
-    const displayUsername = document.getElementById('displayUsername');
-
-    // Link/File Inputs
+    // Elements
+    const configPanel = document.getElementById('config-panel');
     const sheetUrlInput = document.getElementById('sheetUrl');
     const checkBtn = document.getElementById('checkBtn');
-
-    // Sections
     const loadingSection = document.getElementById('loading');
     const resultsSection = document.getElementById('results');
+    const errorBanner = document.getElementById('errorBanner');
+    const errorText = document.getElementById('errorText');
+
+    // Stats
     const totalCountEl = document.getElementById('totalCount');
     const respondedCountEl = document.getElementById('respondedCount');
     const notRespondedCountEl = document.getElementById('notRespondedCount');
-
-    // Error containers
-    const loginError = document.getElementById('loginError');
-    const appError = document.getElementById('appError');
-
-    // Navigation Logic
-    const showView = (viewName) => {
-        console.log("Showing view:", viewName);
-        if (viewLogin) viewLogin.classList.toggle('hidden', viewName !== 'login');
-        if (viewAbout) viewAbout.classList.toggle('hidden', viewName !== 'about');
-        if (viewApp) viewApp.classList.toggle('hidden', viewName !== 'app');
-    };
-
-    // Auto-login if saved
-    const savedUser = localStorage.getItem('gTrackUser');
-    if (savedUser) {
-        displayUsername.textContent = savedUser;
-        showView('app'); // Skip to app if logged in
-    } else {
-        showView('login');
-    }
-
-    // Login Action
-    btnLogin.addEventListener('click', () => {
-        const name = usernameInput.value.trim();
-        if (name) {
-            localStorage.setItem('gTrackUser', name);
-            displayUsername.textContent = name;
-            showView('about'); // Go to About after login
-        } else {
-            usernameInput.style.border = "1px solid var(--danger)";
-            setTimeout(() => usernameInput.style.border = "none", 2000);
-        }
-    });
-
-    // About -> App Action
-    btnFromAbout.addEventListener('click', () => {
-        showView('app');
-    });
-
-    // List Elements
-    const respondedUl = document.getElementById('respondedUl');
-    const notRespondedUl = document.getElementById('notRespondedUl');
     const respondedBadge = document.getElementById('respondedBadge');
     const notRespondedBadge = document.getElementById('notRespondedBadge');
 
-    // Toggle & Inputs
+    // Lists
+    const respondedUl = document.getElementById('respondedUl');
+    const notRespondedUl = document.getElementById('notRespondedUl');
+
+    // Toggles
     const btnLinkMode = document.getElementById('btnLinkMode');
     const btnFileMode = document.getElementById('btnFileMode');
     const modeLink = document.getElementById('modeLink');
@@ -75,59 +28,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('fileInput');
     const filePreview = document.getElementById('filePreview');
     const fileNameEl = document.getElementById('fileName');
-    const removeFile = document.getElementById('removeFile');
+    const removeFileBtn = document.getElementById('removeFile');
+
+    // Export
+    const copyRespondedBtn = document.getElementById('copyResponded');
+    const copyNotRespondedBtn = document.getElementById('copyNotResponded');
 
     let isFileMode = false;
     let selectedFile = null;
+    let currentData = null;
 
-    // --- Toggle Logic ---
-    btnLinkMode.addEventListener('click', () => setMode(false));
-    btnFileMode.addEventListener('click', () => setMode(true));
-
-    function setMode(isFile) {
+    // --- Tab Logic ---
+    const setMode = (isFile) => {
         isFileMode = isFile;
-        // Buttons
         btnLinkMode.classList.toggle('active', !isFile);
         btnFileMode.classList.toggle('active', isFile);
 
-        // Sections
         if (isFile) {
             modeLink.classList.add('hidden');
             modeFile.classList.remove('hidden');
+            modeFile.classList.add('view-transition');
         } else {
-            modeLink.classList.remove('hidden');
             modeFile.classList.add('hidden');
+            modeLink.classList.remove('hidden');
+            modeLink.classList.add('view-transition');
         }
         clearError();
-    }
+    };
+
+    btnLinkMode.addEventListener('click', () => setMode(false));
+    btnFileMode.addEventListener('click', () => setMode(true));
 
     // --- File Handling ---
     dropArea.addEventListener('click', () => fileInput.click());
-
     fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 
-    // Drag & Drop
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
     });
 
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    dropArea.addEventListener('dragover', () => dropArea.classList.add('dragover'));
-    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+    dropArea.addEventListener('dragover', () => dropArea.style.borderColor = 'hsl(var(--neon-blue))');
+    dropArea.addEventListener('dragleave', () => dropArea.style.borderColor = 'var(--glass-border)');
 
     dropArea.addEventListener('drop', (e) => {
-        dropArea.classList.remove('dragover');
+        dropArea.style.borderColor = 'var(--glass-border)';
         handleFile(e.dataTransfer.files[0]);
     });
 
     function handleFile(file) {
         if (!file) return;
         if (!file.name.match(/\.(csv|xlsx|xls)$/i)) {
-            showError("Invalid file type. Please upload Excel or CSV.");
+            showError("Please upload a valid CSV or Excel file.");
             return;
         }
         selectedFile = file;
@@ -137,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearError();
     }
 
-    removeFile.addEventListener('click', (e) => {
+    removeFileBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedFile = null;
         fileInput.value = '';
@@ -145,195 +99,148 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreview.classList.add('hidden');
     });
 
-    // Copy Buttons
-    const copyRespondedBtn = document.getElementById('copyResponded');
-    const copyNotRespondedBtn = document.getElementById('copyNotResponded');
-
-    // Helper to show error
-    const showError = (message, view = 'app') => {
-        console.error("Error:", message);
-        const container = view === 'login' ? loginError : appError;
-        if (container) {
-            container.innerHTML = `<div class="error-msg"><i class="fa-solid fa-triangle-exclamation"></i> <span>${message}</span></div>`;
-            container.classList.remove('hidden');
-        } else {
-            alert(message);
-        }
-    };
-
-    const clearError = () => {
-        if (loginError) { loginError.innerHTML = ''; loginError.classList.add('hidden'); }
-        if (appError) { appError.innerHTML = ''; appError.classList.add('hidden'); }
-    };
-
-    // Helper to copy list
-    const copyList = (items, btn) => {
-        if (!items || items.length === 0) return;
-        const text = items.join('\n');
-        navigator.clipboard.writeText(text).then(() => {
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i>';
-            setTimeout(() => {
-                btn.innerHTML = originalHTML;
-            }, 1000);
-        });
-    };
-
-    let currentData = null;
-
+    // --- Core Action ---
     checkBtn.addEventListener('click', async () => {
-        // Reset UI
         clearError();
-        let bodyBase = null;
+        resultsSection.classList.add('hidden');
+
+        let body;
         let headers = {};
 
         if (isFileMode) {
-            if (!selectedFile) {
-                showError("Please upload a file first.");
-                return;
-            }
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            bodyBase = formData;
-            // No content-type header for FormData (browser sets it with boundary)
+            if (!selectedFile) return showError("Please select a file first.");
+            body = new FormData();
+            body.append('file', selectedFile);
         } else {
             const url = sheetUrlInput.value.trim();
-            if (!url) {
-                showError("Please enter a Google Sheet URL.");
-                return;
-            }
+            if (!url) return showError("Please enter a Google Sheet URL.");
             if (!url.includes("docs.google.com/spreadsheets") && !url.includes("drive.google")) {
-                showError("That doesn't look like a valid Google Sheet URL.");
-                return;
+                return showError("Invalid Google Sheet URL format.");
             }
-            bodyBase = JSON.stringify({ url: url });
+            body = JSON.stringify({ url });
             headers['Content-Type'] = 'application/json';
         }
 
-        resultsSection.classList.add('hidden');
+        // Start Loading
         loadingSection.classList.remove('hidden');
         checkBtn.disabled = true;
-        checkBtn.innerHTML = '<span>Processing...</span>';
-        currentData = null;
+        checkBtn.innerHTML = '<span>Processing Library...</span> <i class="fa-solid fa-sync fa-spin"></i>';
 
         try {
-            const response = await fetch('/check', {
-                method: 'POST',
-                headers: headers,
-                body: bodyBase,
-            });
-
+            const response = await fetch('/check', { method: 'POST', headers, body });
             const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(data.error || "An unexpected error occurred.");
-            }
+            if (!response.ok) throw new Error(data.error || "Verification engine failed.");
 
             currentData = data;
-
-            // Populate Results
-            totalCountEl.textContent = data.total_students;
-            respondedCountEl.textContent = data.responded_count;
-            notRespondedCountEl.textContent = data.not_responded_count;
-
-            respondedBadge.textContent = data.responded_count;
-            notRespondedBadge.textContent = data.not_responded_count;
-
-            // Show Debug Info
-            if (data.debug_info) {
-                const debugDiv = document.getElementById('debugInfoContainer') || document.createElement('div');
-                debugDiv.id = 'debugInfoContainer';
-                debugDiv.className = 'debug-info';
-
-                let rowsHtml = '';
-                data.debug_info.preview_rows.forEach(row => {
-                    let extra = '';
-                    if (row.status === "Not Responded" && row.missing_cols && row.missing_cols.length > 0) {
-                        extra = `<br><small style="color: #f87171;">Missing: ${row.missing_cols.join(', ')}</small>`;
-                    }
-                    rowsHtml += `<li><strong>${row.name}</strong>: ${row.status} (${row.answers_found}/${row.total_required}) ${extra}</li>`;
-                });
-
-                debugDiv.innerHTML = `
-                    <p><i class="fa-solid fa-magic-wand-sparkles"></i> <strong>Analysis Info:</strong></p>
-                    <ul>
-                        <li>Using <strong>"${data.debug_info.detected_name_column}"</strong> as Name.</li>
-                        <li>Checking <strong>${data.debug_info.detected_answer_columns.length}</strong> required columns.</li>
-                    </ul>
-                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:10px 0;">
-                    <p><strong>First Few Rows Check:</strong></p>
-                    <ul>${rowsHtml}</ul>
-                `;
-                
-                const debugTarget = document.getElementById('debugTarget');
-                if (debugTarget) {
-                    debugTarget.innerHTML = '';
-                    debugTarget.appendChild(debugDiv);
-                    debugTarget.classList.remove('hidden');
-                }
-            }
-
-            // Populate Lists
-            renderList(respondedUl, data.responded_list);
-            renderList(notRespondedUl, data.not_responded_list);
-
-            // Show Results
-            loadingSection.classList.add('hidden');
-            resultsSection.classList.remove('hidden');
-            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            renderDashboard(data);
 
         } catch (err) {
-            loadingSection.classList.add('hidden');
             showError(err.message);
         } finally {
+            loadingSection.classList.add('hidden');
             checkBtn.disabled = false;
-            checkBtn.innerHTML = '<span>Check Responses</span> <i class="fa-solid fa-arrow-right"></i>';
+            checkBtn.innerHTML = '<span>Start Verification</span> <i class="fa-solid fa-wand-magic-sparkles"></i>';
         }
     });
 
-    // Copy Event Listeners
-    copyRespondedBtn.addEventListener('click', () => {
-        if (currentData) copyList(currentData.responded_list, copyRespondedBtn);
-    });
+    function renderDashboard(data) {
+        // Animate Numbers
+        animateValue(totalCountEl, 0, data.total_students, 1200);
+        animateValue(respondedCountEl, 0, data.responded_count, 1200);
+        animateValue(notRespondedCountEl, 0, data.not_responded_count, 1200);
 
-    copyNotRespondedBtn.addEventListener('click', () => {
-        if (currentData) copyList(currentData.not_responded_list, copyNotRespondedBtn);
-    });
+        respondedBadge.textContent = data.responded_count;
+        notRespondedBadge.textContent = data.not_responded_count;
 
-    function renderList(ulElement, items) {
-        ulElement.innerHTML = '';
+        // Render Lists
+        renderList(respondedUl, data.responded_list, 'verified');
+        renderList(notRespondedUl, data.not_responded_list, 'missing');
+
+        // Show Results
+        resultsSection.classList.remove('hidden');
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Intelligence Logs
+        if (data.debug_info) {
+            const debugTarget = document.getElementById('debugTarget');
+            debugTarget.innerHTML = `
+                <div style="color: hsl(var(--neon-blue)); font-weight: 700; margin-bottom: 0.5rem;">
+                    <i class="fa-solid fa-microchip"></i> Verification Intelligence
+                </div>
+                <p>Target Name Column: <span style="color:#fff;">"${data.debug_info.detected_name_column}"</span></p>
+                <p>Required Data Points: <span style="color:#fff;">${data.debug_info.detected_answer_columns.length}</span></p>
+                <div style="margin-top: 1rem; opacity: 0.7;">Engine successfully parsed ${data.total_students} entries.</div>
+            `;
+            debugTarget.classList.remove('hidden');
+        }
+    }
+
+    function renderList(ul, items, type) {
+        ul.innerHTML = '';
         if (items.length === 0) {
-            const li = document.createElement('li');
-            li.textContent = "None found";
-            li.style.fontStyle = "italic";
-            li.style.opacity = "0.5";
-            ulElement.appendChild(li);
+            ul.innerHTML = `<li style="opacity: 0.5; justify-content: center;">No entries found</li>`;
             return;
         }
 
-        items.forEach(item => {
+        items.forEach((item, index) => {
             const li = document.createElement('li');
+            li.style.animation = `slideUp 0.4s ease-out ${index * 0.03}s backwards`;
 
-            if (typeof item === 'object' && item.name) {
-                // It's a student object (Not Responded likely)
-                let html = `<span>${item.name}</span>`;
-                if (item.missing && item.missing.length > 0) {
-                    html += `<br><small style="color: #f87171; font-size: 0.8rem;">Missing: ${item.missing.join(', ')}</small>`;
-                }
-                li.innerHTML = html;
-                li.style.flexDirection = "column";
-                li.style.alignItems = "flex-start";
-            } else {
-                // It's a string (Responded)
-                li.textContent = item;
-            }
+            const name = typeof item === 'object' ? item.name : item;
+            const statusIcon = type === 'verified' ?
+                '<i class="fa-solid fa-circle-check" style="color: hsl(var(--neon-green))"></i>' :
+                '<i class="fa-solid fa-circle-exclamation" style="color: hsl(var(--neon-purple))"></i>';
 
-            ulElement.appendChild(li);
+            li.innerHTML = `
+                <span style="font-weight: 500;">${name}</span>
+                ${statusIcon}
+            `;
+            ul.appendChild(li);
         });
     }
 
-    // Input animation listener
-    sheetUrlInput.addEventListener('focus', () => {
-        clearError();
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    function showError(msg) {
+        errorText.textContent = msg;
+        errorBanner.classList.remove('hidden');
+        errorBanner.classList.add('view-transition');
+    }
+
+    function clearError() {
+        errorBanner.classList.add('hidden');
+    }
+
+    // --- Export Logic ---
+    copyRespondedBtn.addEventListener('click', () => exportList(currentData.responded_list, copyRespondedBtn));
+    copyNotRespondedBtn.addEventListener('click', () => {
+        const list = currentData.not_responded_list.map(i => typeof i === 'object' ? i.name : i);
+        exportList(list, copyNotRespondedBtn);
     });
+
+    function exportList(list, btn) {
+        if (!list || list.length === 0) return;
+        const text = list.join('\n');
+        navigator.clipboard.writeText(text).then(() => {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied to Clipboard';
+            btn.style.color = 'hsl(var(--neon-green))';
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.style.color = '';
+            }, 2000);
+        });
+    }
 });
