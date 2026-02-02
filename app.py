@@ -14,14 +14,11 @@ def extract_sheet_id(url):
         return match.group(1)
     return None
 
-def process_sheet_data(csv_url):
-    """Reads CSV data and categorizes students."""
+def analyze_dataframe(df):
+    """Refactored logic to process an already loaded DataFrame."""
     try:
-        # Read the CSV from the URL
-        df = pd.read_csv(csv_url)
-        
         # Trim whitespace from headers and values
-        df.columns = df.columns.str.strip()
+        df.columns = df.columns.astype(str).str.strip()
         df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
         print("DEBUG: Columns found:", df.columns.tolist())
@@ -51,54 +48,60 @@ def process_sheet_data(csv_url):
              return {"error": f"Could not identify a Name column. Found columns: {df.columns.tolist()}"}
 
         # All other columns are questions/answers (exclude the name column)
-        # We process all columns EXCEPT the name column and Timestamp column (if exists)
-        raw_answer_cols = [c for c in df.columns if c != name_col and "Timestamp" not in c]
+        raw_answer_cols = [c for c in df.columns if c != name_col and "Timestamp" not in c and "Score" not in c and "Total" not in c and "Points" not in c]
         
         # Filter out "Ghost Columns" (columns that are completely empty for EVERYONE)
-        # This prevents strict checks from failing just because there's an empty "Comments" column or formatting column
+        # This prevents strict checks from failing just because there's an empty "Comments" column
         answer_cols = []
         for col in raw_answer_cols:
-             # Check if this column has ANY valid data
+             # Check if this column has ANY valid data in the entire sheet
              has_data = df[col].dropna().apply(lambda x: str(x).strip() not in ["", "nan", "None", "NaN"]).any()
              if has_data:
                  answer_cols.append(col)
         
         print(f"DEBUG: Using '{name_col}' as Name Column.")
-        print(f"DEBUG: Using {answer_cols} as Answer Columns (filtered from {len(raw_answer_cols)} total).")
+        print(f"DEBUG: Using {answer_cols} as Answer Columns.")
 
         responded_list = []
         not_responded_list = []
-        debug_rows = [] # Store first 5 rows for debugging
+        debug_rows = []
 
         for index, row in df.iterrows():
             student_name = str(row[name_col]).strip()
             
-            # Skip empty names or 'nan'
             if not student_name or student_name.lower() in ['nan', 'none', '']:
                 continue
 
-            # Check answers
             row_answers = row[answer_cols]
-            
             has_response = False
             
-            # Efficiently check if any value is not null and not empty string
             valid_answers = [str(x).strip() for x in row_answers if pd.notna(x) and str(x).strip() not in ["", "nan", "None", "NaN"]]
             
-            # STRICT CHECK: Must fill ALL answer columns to be considered "Responded"
+            # STRICT CHECK: Must fill ALL answer columns
             if len(valid_answers) == len(answer_cols):
                 has_response = True
 
             if has_response:
                 responded_list.append(student_name)
             else:
-                not_responded_list.append(student_name)
+                # Identify missing columns
+                missing = [col for col in answer_cols if str(row[col]).strip() in ["", "nan", "None", "NaN"] or pd.isna(row[col])]
+                not_responded_list.append({
+                    "name": student_name,
+                    "missing": missing
+                })
             
-            if index < 5:
+            if index < 5 or (not has_response and len(debug_rows) < 10):
+                missing_debug = []
+                if not has_response:
+                     missing_debug = [col for col in answer_cols if str(row[col]).strip() in ["", "nan", "None", "NaN"] or pd.isna(row[col])]
+                
                 debug_rows.append({
                     "name": student_name,
                     "status": "Responded" if has_response else "Not Responded",
-                    "answers_found": len(valid_answers)
+                    "answers_found": len(valid_answers),
+                    "total_required": len(answer_cols),
+                    "missing_cols": missing_debug
                 })
 
         return {
@@ -115,7 +118,7 @@ def process_sheet_data(csv_url):
         }
 
     except Exception as e:
-        print(f"DEBUG: Error processing sheet: {e}")
+        print(f"DEBUG: Error analyzing dataframe: {e}")
         return {"error": str(e)}
 
 @app.route('/')
@@ -124,27 +127,52 @@ def index():
 
 @app.route('/check', methods=['POST'])
 def check_responses():
-    data = request.json
-    sheet_url = data.get('url')
-
-    if not sheet_url:
-        return jsonify({"error": "No URL provided"}), 400
-
-    sheet_id = extract_sheet_id(sheet_url)
-    if not sheet_id:
-        return jsonify({"error": "Invalid Google Sheet URL. Could not find Sheet ID."}), 400
-
-    # Construct CSV Export URL
-    csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+    df = None
     
-    # We can try to verify connectivity first, but requests/pandas will handle it
-    results = process_sheet_data(csv_url)
-    
-    if "error" in results:
-        status_code = 400 if "must have" in results["error"] else 500
-        return jsonify(results), status_code
+    # Handle File Upload
+    if 'file' in request.files:
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+        
+        try:
+            filename = file.filename.lower()
+            if filename.endswith('.csv'):
+                df = pd.read_csv(file)
+            elif filename.endswith(('.xls', '.xlsx')):
+                df = pd.read_excel(file)
+            else:
+                return jsonify({"error": "Invalid file format. Please upload CSV or Excel."}), 400
+        except Exception as e:
+            return jsonify({"error": f"Failed to read file: {str(e)}"}), 500
 
-    return jsonify(results)
+    # Handle URL
+    elif request.is_json:
+        data = request.json
+        sheet_url = data.get('url')
+        if not sheet_url:
+             return jsonify({"error": "No data provided"}), 400
+             
+        sheet_id = extract_sheet_id(sheet_url)
+        if not sheet_id:
+             return jsonify({"error": "Invalid Google Sheet URL"}), 400
+             
+        csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+        try:
+            df = pd.read_csv(csv_url)
+        except Exception as e:
+            return jsonify({"error": f"Failed to fetch Google Sheet: {str(e)}"}), 400
+
+    else:
+        return jsonify({"error": "Unsupported request type"}), 400
+
+    if df is not None:
+        results = analyze_dataframe(df)
+        if "error" in results:
+             return jsonify(results), 400
+        return jsonify(results)
+    
+    return jsonify({"error": "Processing failed"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
