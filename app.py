@@ -8,6 +8,8 @@ app = Flask(__name__)
 
 def extract_sheet_id(url):
     """Extracts the Google Sheet ID from the URL."""
+    if not isinstance(url, str):
+        return None
     # Pattern looks for /d/ followed by the ID
     match = re.search(r"/d/([a-zA-Z0-9-_]+)", url)
     if match:
