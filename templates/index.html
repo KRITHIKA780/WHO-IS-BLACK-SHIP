@@ -27,7 +27,7 @@
         </header>
 
         <!-- View 1: Login -->
-        <section id="view-login" class="view-section active">
+        <section id="view-login" class="view-section">
             <div class="glass-panel main-input" style="max-width: 500px; margin: 0 auto;">
                 <h2 style="text-align: center; margin-bottom: 2rem;">Welcome to G-Tracker</h2>
                 <div class="input-group">
@@ -43,10 +43,15 @@
         <!-- View 2: About / Instructions -->
         <section id="view-about" class="view-section hidden">
             <div class="glass-panel main-input" style="max-width: 600px; margin: 0 auto;">
-                <h2 style="margin-bottom: 1.5rem;">Hello, <span id="displayUsername" style="color: var(--accent-primary);">User</span>!</h2>
-                <p style="margin-bottom: 1rem; line-height: 1.6;">G-Tracker helps you identify who has filled your Google Form and who hasn't. You can either provide a <strong>Public Google Sheet Link</strong> or upload a <strong>CSV/Excel file</strong>.</p>
+                <h2 style="margin-bottom: 1.5rem;">Hello, <span id="displayUsername"
+                        style="color: var(--accent-primary);">User</span>!</h2>
+                <p style="margin-bottom: 1rem; line-height: 1.6;">G-Tracker helps you identify who has filled your
+                    Google Form and who hasn't. You can either provide a <strong>Public Google Sheet Link</strong> or
+                    upload a <strong>CSV/Excel file</strong>.</p>
                 <div style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem;">
-                    <p style="font-size: 0.9rem; color: var(--text-secondary);"><i class="fa-solid fa-circle-info"></i> Make sure your Sheet is set to <strong>"Anyone with the link can view"</strong> if using a URL.</p>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);"><i class="fa-solid fa-circle-info"></i>
+                        Make sure your Sheet is set to <strong>"Anyone with the link can view"</strong> if using a URL.
+                    </p>
                 </div>
                 <button class="primary-btn" id="btnFromAbout" style="width: 100%;">
                     <span>Let's Start</span> <i class="fa-solid fa-rocket"></i>
@@ -58,8 +63,10 @@
         <section id="view-app" class="view-section hidden">
             <div class="glass-panel main-input">
                 <div class="mode-toggle">
-                    <button class="toggle-btn active" id="btnLinkMode"><i class="fa-solid fa-link"></i> Google Sheet URL</button>
-                    <button class="toggle-btn" id="btnFileMode"><i class="fa-solid fa-file-csv"></i> Upload File</button>
+                    <button class="toggle-btn active" id="btnLinkMode"><i class="fa-solid fa-link"></i> Google Sheet
+                        URL</button>
+                    <button class="toggle-btn" id="btnFileMode"><i class="fa-solid fa-file-csv"></i> Upload
+                        File</button>
                 </div>
 
                 <!-- URL Mode -->
@@ -128,7 +135,8 @@
                             <h2><i class="fa-solid fa-circle-check"></i> Responded</h2>
                             <div class="header-actions">
                                 <span class="badge" id="respondedBadge">0</span>
-                                <button class="copy-btn" id="copyResponded" title="Copy List"><i class="fa-regular fa-copy"></i></button>
+                                <button class="copy-btn" id="copyResponded" title="Copy List"><i
+                                        class="fa-regular fa-copy"></i></button>
                             </div>
                         </div>
                         <ul id="respondedUl" class="student-list"></ul>
@@ -140,7 +148,8 @@
                             <h2><i class="fa-solid fa-circle-xmark"></i> Not Responded</h2>
                             <div class="header-actions">
                                 <span class="badge" id="notRespondedBadge">0</span>
-                                <button class="copy-btn" id="copyNotResponded" title="Copy List"><i class="fa-regular fa-copy"></i></button>
+                                <button class="copy-btn" id="copyNotResponded" title="Copy List"><i
+                                        class="fa-regular fa-copy"></i></button>
                             </div>
                         </div>
                         <ul id="notRespondedUl" class="student-list"></ul>
