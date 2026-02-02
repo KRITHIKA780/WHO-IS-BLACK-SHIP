@@ -101,7 +101,6 @@ body {
 .hero {
     text-align: center;
     margin-bottom: 3rem;
-    animation: fadeInDown 0.8s ease-out;
 }
 
 .logo {
@@ -217,7 +216,6 @@ body {
     padding: 1rem;
     border-radius: 12px;
     margin-top: 1rem;
-    animation: fadeIn 0.3s;
 }
 
 .file-preview i {
@@ -247,7 +245,7 @@ body {
     flex-direction: column;
     gap: 1.2rem;
     margin-bottom: 3rem;
-    animation: fadeInUp 0.8s ease-out 0.2s backwards;
+    width: 100%;
 }
 
 .input-group {
@@ -326,7 +324,6 @@ input[type="text"]:focus+.input-icon {
     text-align: center;
     margin: 2rem 0;
     color: var(--text-secondary);
-    animation: fadeIn 0.5s;
 }
 
 .spinner {
@@ -350,7 +347,6 @@ input[type="text"]:focus+.input-icon {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
-    animation: fadeInUp 0.6s ease-out;
 }
 
 .stat-card {
@@ -361,8 +357,6 @@ input[type="text"]:focus+.input-icon {
     display: flex;
     align-items: center;
     gap: 1rem;
-    animation: fadeInUp 0.5s ease-out backwards;
-    animation-delay: var(--delay);
 }
 
 .icon-box {
@@ -409,8 +403,6 @@ input[type="text"]:focus+.input-icon {
     border-radius: 16px;
     padding: 1.5rem;
     margin-top: 2rem;
-    animation: fadeInUp 0.5s ease-out backwards;
-    animation-delay: var(--delay);
 }
 
 .responded-list {
@@ -542,7 +534,6 @@ input[type="text"]:focus+.input-icon {
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    animation: shake 0.5s;
 }
 
 @keyframes shake {
